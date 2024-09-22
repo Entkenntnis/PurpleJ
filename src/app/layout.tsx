@@ -1,17 +1,8 @@
 import type { Metadata } from 'next'
-import localFont from 'next/font/local'
-import './globals.css'
+import clsx from 'clsx'
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
-})
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
-})
+import './globals.css'
+import '@xyflow/react/dist/style.css'
 
 export const metadata: Metadata = {
   title: 'BlueJ Online',
@@ -24,12 +15,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="de">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="de" className="h-full">
+      <body className={clsx('antialiased h-full')}>{children}</body>
     </html>
   )
 }

@@ -1,70 +1,33 @@
 'use client'
 
-import Script from 'next/script'
-import { useEffect, useState } from 'react'
+import { ClassDiagram } from '@/components/ClassDiagram'
+import { UIStore } from '@/store'
 
-export default function Home() {
-  const [state, setState] = useState(0)
-  const [url, setUrl] = useState('')
-  useEffect(() => {
-    void (async () => {
-      setUrl(
-        (
-          await (
-            await fetch('https://cjrtnc.leaningtech.com/LATEST.txt')
-          ).text()
-        ).trim(),
-      )
-      setState(1)
-    })()
-  }, [])
-
+export default function IDE() {
+  const files = UIStore.useState((s) => s.files)
   return (
     <>
-      {url && (
-        <Script
-          src={url}
-          onLoad={async () => {
-            await window.cheerpjInit()
-            setState(2)
-          }}
-        />
-      )}
-      {state == 0 && <div>...</div>}
-      {state == 1 && <div>CheerpJ wird geladen</div>}
-      {state == 2 && (
-        <div>
-          Schreibe dein Programm:
-          <textarea
-            className="w-full h-[300px] bg-yellow-50 p-3"
-            id="code"
-          ></textarea>
-          <button
-            onClick={async () => {
-              const classPath = '/app/tools.jar:/files/'
-              const sourceFiles = ['/str/Main.java']
-
-              cheerpOSAddStringFile(
-                '/str/Main.java',
-                document.getElementById('code').value,
-              )
-              const code = await cheerpjRunMain(
-                'com.sun.tools.javac.Main',
-                classPath,
-                ...sourceFiles,
-                '-d',
-                '/files/',
-                '-Xlint',
-              )
-              console.log(code)
-              cheerpjRunMain('Main', classPath)
-            }}
-          >
-            Ausführen
+      <div className="h-full flex flex-col">
+        <div className="h-12 bg-gray-50 flex-grow-0 flex-shrink-0 flex items-center justify-start gap-4 pl-4">
+          <button className="px-2 py-0.5 bg-lime-200 rounded hover:bg-lime-300">
+            Klassenübersicht
           </button>
+          {files.map(({ name }, i) => (
+            <button
+              key={i}
+              className="px-2 py-0.5 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              {name}
+            </button>
+          ))}
         </div>
-      )}
-      <pre className="font-mono text-sm min-h-3 border" id="console" />
+        <div className="flex-grow flex">
+          <div className="flex-1 border-2 border-lime-300">
+            <ClassDiagram />
+          </div>
+          <div className="bg-llime-300 flex-1">Für temporäre Sachen</div>
+        </div>
+      </div>
     </>
   )
 }
