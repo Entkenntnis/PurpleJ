@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.cheerpjNC::before {
+/*.cheerpjNC::before {
   content: '' !important;
-}
+}*/
