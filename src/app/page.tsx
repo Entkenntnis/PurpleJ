@@ -25,7 +25,18 @@ export default function IDE() {
           <div className="flex-1 border-2 border-lime-300">
             <ClassDiagram />
           </div>
-          <div className="bg-llime-300 flex-1">Für temporäre Sachen</div>
+          <div className="bg-llime-300 flex-1">
+            <ul>
+              <li>Konsole</li>
+              <li>Graphische Ausgabe</li>
+              <li>Vorlage laden</li>
+              <li>Neue Klasse einfügen</li>
+              <li>Kompilieren</li>
+              <li>CheerpJ Status</li>
+              <li>Laufzeit starten</li>
+              <li>Objekte erstellen</li>
+            </ul>
+          </div>
         </div>
       </div>
     </>

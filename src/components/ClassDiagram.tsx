@@ -1,6 +1,5 @@
 import {
   Background,
-  NodeProps,
   NodeResizeControl,
   ReactFlow,
   useEdgesState,
