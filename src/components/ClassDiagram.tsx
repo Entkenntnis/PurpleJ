@@ -19,7 +19,6 @@ export function ClassDiagram() {
       style: {
         background: '#fff',
         border: '1px solid black',
-        borderRadius: 15,
         fontSize: 12,
       },
     })),
