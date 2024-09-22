@@ -1,11 +1,16 @@
 import { Store } from 'pullstate'
-
-interface IUIStore {
-  files: { name: string; content: string; id: number }[]
-  filesIdCounter: number
-}
+import { IUIStore } from '../data/types'
+import { figuresExample } from '../data/figures-example'
 
 export const UIStore = new Store<IUIStore>({
-  files: [{ name: 'Test', content: 'Hello', id: 1 }],
-  filesIdCounter: 2,
+  classes: figuresExample,
+  openClasses: [],
+  openClass: null,
+  controllerState: 'loading',
+  cheerpjUrl: '',
+  dirtyClasses: [],
+  mainScript: `Triangle t = new Triangle();
+System.out.println("Hallo");
+t.makeVisible();`,
+  mainScriptDirty: true,
 })

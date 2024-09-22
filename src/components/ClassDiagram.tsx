@@ -1,3 +1,4 @@
+import { UIStore } from '@/store'
 import {
   Background,
   NodeResizeControl,
@@ -6,49 +7,23 @@ import {
   useNodesState,
 } from '@xyflow/react'
 
-const initialNodes = [
-  {
-    id: '1',
-    type: 'SingleClass',
-    data: { label: 'Input Node' },
-    position: { x: 250, y: 25 },
-    style: {
-      background: '#fff',
-      border: '1px solid black',
-      borderRadius: 15,
-      fontSize: 12,
-    },
-  },
-
-  {
-    id: '2',
-    type: 'SingleClass',
-    // you can also pass a React component as a label
-    data: { label: <div>Default Node</div> },
-    position: { x: 100, y: 125 },
-    style: {
-      background: '#fff',
-      border: '1px solid black',
-      borderRadius: 15,
-      fontSize: 12,
-    },
-  },
-  {
-    id: '3',
-    type: 'SingleClass',
-    data: { label: 'Output Node' },
-    position: { x: 250, y: 250 },
-    style: {
-      background: '#fff',
-      border: '1px solid black',
-      borderRadius: 15,
-      fontSize: 12,
-    },
-  },
-]
-
 export function ClassDiagram() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
+  const classes = UIStore.useState((s) => s.classes)
+
+  const [nodes, , onNodesChange] = useNodesState(
+    classes.map((c, i) => ({
+      id: i.toString(),
+      type: 'SingleClass',
+      data: { label: c.name },
+      position: { x: 50, y: 50 + i * 100 },
+      style: {
+        background: '#fff',
+        border: '1px solid black',
+        borderRadius: 15,
+        fontSize: 12,
+      },
+    })),
+  )
   const [edges, , onEdgesChange] = useEdgesState([])
 
   return (
@@ -75,8 +50,20 @@ const SingleClass = ({ data }: { data: { label: string } }) => {
         <ResizeIcon />
       </NodeResizeControl>
       <div className="p-3 pr-6 pb-6">
-        {data.label}
-        <button>Edit</button>
+        <p>{data.label}</p>
+        <button
+          className="underline"
+          onClick={() => {
+            UIStore.update((s) => {
+              if (!s.openClasses.includes(data.label)) {
+                s.openClasses.push(data.label)
+              }
+              s.openClass = data.label
+            })
+          }}
+        >
+          Bearbeiten
+        </button>
       </div>
     </>
   )
