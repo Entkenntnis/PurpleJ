@@ -59,6 +59,11 @@ export function Runner() {
               },
             })
             cheerpjCreateDisplay(-1, -1, displayRef.current)
+            await cheerpjRunMain(
+              'com.sun.tools.javac.Main',
+              '/app/tools.jar',
+              '-version',
+            )
             UIStore.update((s) => {
               s.controllerState = 'compile-or-run'
               s.dirtyClasses = s.classes.map((c) => c.name)

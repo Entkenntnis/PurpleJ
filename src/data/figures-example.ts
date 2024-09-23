@@ -3,6 +3,7 @@ import { IUIStore } from './types'
 export const figuresExample: IUIStore['classes'] = [
   {
     name: 'Canvas',
+    position: { x: 50, y: 50 },
     content: `import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -237,6 +238,7 @@ public class Canvas
   },
   {
     name: 'Circle',
+    position: { x: 50, y: 150 },
     content: `import java.awt.*;
 import java.awt.geom.*;
 
@@ -432,6 +434,7 @@ public class Circle
   },
   {
     name: 'Square',
+    position: { x: 50, y: 250 },
     content: `import java.awt.*;
 
 /**
@@ -627,6 +630,7 @@ public class Square
   },
   {
     name: 'Triangle',
+    position: { x: 50, y: 350 },
     content: `import java.awt.*;
 
 /**
@@ -826,6 +830,7 @@ public class Triangle
   },
   {
     name: 'Person',
+    position: { x: 50, y: 450 },
     content: `import java.awt.*;
 
 /**

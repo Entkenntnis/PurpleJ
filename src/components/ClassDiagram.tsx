@@ -15,11 +15,12 @@ export function ClassDiagram() {
       id: i.toString(),
       type: 'SingleClass',
       data: { label: c.name },
-      position: { x: 50, y: 50 + i * 100 },
+      position: { x: c.position.x, y: c.position.y },
       style: {
         background: '#fff',
         border: '1px solid black',
         fontSize: 12,
+        ...(c.size ?? {}),
       },
     })),
   )
@@ -29,7 +30,17 @@ export function ClassDiagram() {
     <ReactFlow
       nodes={nodes}
       edges={edges}
-      onNodesChange={onNodesChange}
+      onNodesChange={(e) => {
+        for (const event of e) {
+          if (event.type == 'position' && !event.dragging) {
+            UIStore.update((s) => {
+              s.classes.find((_, i) => i.toString() === event.id)!.position =
+                event.position!
+            })
+          }
+        }
+        onNodesChange(e)
+      }}
       onEdgesChange={onEdgesChange}
       nodeTypes={{ SingleClass }}
     >
@@ -38,11 +49,21 @@ export function ClassDiagram() {
   )
 }
 
-const SingleClass = ({ data }: { data: { label: string } }) => {
+const SingleClass = ({ data, id }: { data: { label: string }; id: string }) => {
   return (
     <>
       <NodeResizeControl
         style={{ background: 'transparent', border: 'none' }}
+        onResizeEnd={(e) => {
+          UIStore.update((s) => {
+            const c = s.classes.find((_, i) => i.toString() === id)!
+            if (!c?.size) {
+              c.size = { width: 0, height: 0 }
+            }
+            c.size.width = e.x
+            c.size.height = e.y
+          })
+        }}
         minWidth={100}
         minHeight={50}
       >
