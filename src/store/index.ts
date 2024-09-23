@@ -8,9 +8,8 @@ export const UIStore = new Store<IUIStore>({
   openClass: null,
   controllerState: 'loading',
   cheerpjUrl: '',
-  dirtyClasses: [],
-  mainScript: `Triangle t = new Triangle();
-System.out.println("Hallo");
-t.makeVisible();`,
-  mainScriptDirty: true,
+  dirtyClasses: figuresExample.map((c) => c.name),
+  api: {},
+  instances: [],
+  inAction: false,
 })

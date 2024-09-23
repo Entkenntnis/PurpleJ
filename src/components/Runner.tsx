@@ -1,3 +1,4 @@
+import { ClassAPI, Runtime } from '@/data/types'
 import { UIStore } from '@/store'
 import clsx from 'clsx'
 import Script from 'next/script'
@@ -8,9 +9,10 @@ export function Runner() {
   const cheerpjUrl = UIStore.useState((s) => s.cheerpjUrl)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
   const classes = UIStore.useState((s) => s.classes)
-  const mainScript = UIStore.useState((s) => s.mainScript)
-  const mainScriptDirty = UIStore.useState((s) => s.mainScriptDirty)
+  const api = UIStore.useState((s) => s.api)
   const displayRef = useRef<HTMLDivElement>(null)
+  const instances = UIStore.useState((s) => s.instances)
+  const inAction = UIStore.useState((s) => s.inAction)
   useEffect(() => {
     if (controllerState === 'loading' && !cheerpjUrl) {
       void (async () => {
@@ -25,6 +27,75 @@ export function Runner() {
       })()
     }
   }, [controllerState, cheerpjUrl])
+
+  const runtime = useRef<Runtime>({
+    exit() {
+      // TODO: default runtime
+    },
+    lib: {},
+    heap: {},
+  })
+
+  const interactiveElements: { code: string; action: () => void }[] = []
+
+  Object.entries(api).forEach(([name, api]) => {
+    if (api.hasPublicConstructor) {
+      interactiveElements.push({
+        code: `new ${name}(${api.publicConstructorParams.map((el) => `${el.type} ${el.name}`).join(', ')})`,
+        action: () => {
+          void (async () => {
+            UIStore.update((s) => {
+              s.inAction = true
+            })
+            const C = await runtime.current.lib[name]
+            const instance = await new C()
+            let i = 1
+            let instanceName = ''
+            do {
+              instanceName = `${name.toLowerCase()}${i}`
+              i++
+            } while (runtime.current.heap[instanceName])
+            runtime.current.heap[instanceName] = instance
+            UIStore.update((s) => {
+              s.instances.push({ name: instanceName, type: name })
+              s.inAction = false
+            })
+          })()
+        },
+      })
+    }
+  })
+  instances.forEach(({ name, type }) => {
+    api[type].publicMethods.forEach((method) => {
+      if (method.parameters.some((p) => p.type !== 'int')) return
+      interactiveElements.push({
+        code: `${
+          method.returnType !== 'void' ? method.returnType + ' ' : ''
+        }${name}.${method.name}(${method.parameters.map((el) => `${el.type} ${el.name}`).join(', ')})`,
+        action: () => {
+          const params: number[] = []
+          for (let i = 0; i < method.parameters.length; i++) {
+            params.push(
+              parseInt(
+                prompt(`Gib Zahl ein für ${method.parameters[i].name}`) ?? '0',
+              ),
+            )
+          }
+          void (async () => {
+            const instance = runtime.current.heap[name]
+            UIStore.update((s) => {
+              s.inAction = true
+            })
+            await instance[method.name](...params)
+            UIStore.update((s) => {
+              s.inAction = false
+            })
+          })()
+        },
+      })
+    })
+  })
+
   return (
     <>
       {cheerpjUrl && (
@@ -57,6 +128,22 @@ export function Runner() {
                 '/lt/8/jre/lib': [],
                 '/lt/8/lib/ct.sym': [],
               },
+              natives: {
+                async Java_SyntheticMain_entry(lib: object) {
+                  /*console.log('Hi!')
+                  window.lib = lib
+                  console.log(lib)*/
+                  //const circle = await lib.Circle.getInstance()
+                  //await circle.makeVisible()
+                  runtime.current.lib = lib
+                  prepareInteractiveMode()
+                  await new Promise((res) => {
+                    runtime.current.exit = () => {
+                      res(null)
+                    }
+                  })
+                },
+              },
             })
             cheerpjCreateDisplay(-1, -1, displayRef.current)
             await cheerpjRunMain(
@@ -65,126 +152,189 @@ export function Runner() {
               '-version',
             )
             UIStore.update((s) => {
-              s.controllerState = 'compile-or-run'
+              s.controllerState = 'compile-if-dirty'
               s.dirtyClasses = s.classes.map((c) => c.name)
             })
           }}
         />
       )}
       <div className="h-full flex flex-col">
-        <div className="flex-grow-0 h-[200px] flex">
-          <div className="flex-1 p-3 bg-yellow-50">
+        <div className="flex-grow-0 h-[350px] flex">
+          <div
+            className={clsx(
+              'flex-1 p-3 bg-yellow-50 overflow-auto',
+              inAction && 'animate-pulse',
+            )}
+          >
             {controllerState === 'loading' && (
               <p>Java-System wird geladen ...</p>
             )}
             {controllerState === 'compiling' && (
               <p>Klassen werden kompiliert ...</p>
             )}
-            {controllerState === 'compile-or-run' && (
-              <>
-                {dirtyClasses.length > 0 || mainScriptDirty ? (
-                  <p>
-                    <button
-                      className="px-2 py-0.5 bg-green-300 hover:bg-green-400 rounded"
-                      onClick={async () => {
-                        // This is the compile step
-                        const encoder = new TextEncoder()
-                        const sourceFiles = ['/str/SyntheticMain.java']
+            {controllerState === 'compile-if-dirty' && (
+              <p>
+                <button
+                  className="px-2 py-0.5 bg-green-300 hover:bg-green-400 rounded"
+                  onClick={async () => {
+                    if (dirtyClasses.length > 0) {
+                      // This is the compile step
+                      const encoder = new TextEncoder()
+                      const sourceFiles = ['/str/SyntheticMain.java']
 
-                        cheerpOSAddStringFile(
-                          sourceFiles[0],
-                          encoder.encode(`class SyntheticMain {
+                      cheerpOSAddStringFile(
+                        sourceFiles[0],
+                        encoder.encode(`class SyntheticMain {
                             public static void main(String[] args) {
-                              ${mainScript}
+                              System.out.println("Interaktiver Modus bereit");
+                              entry();
+                              System.out.println("VM fährt herunter");
+                              System.exit(0);
                             }
+                            public static native void entry();
                           }`),
-                        )
+                      )
 
-                        for (const c of dirtyClasses) {
-                          const filename = `/str/${c}.java`
-                          cheerpOSAddStringFile(
-                            filename,
-                            encoder.encode(
-                              classes.find((el) => el.name == c)!.content,
-                            ),
-                          )
-                          sourceFiles.push(filename)
-                        }
-                        UIStore.update((s) => {
-                          s.controllerState = 'compiling'
-                        })
-
-                        document.getElementById('console')!.innerHTML = ''
-                        /*const code =*/ await cheerpjRunMain(
-                          'com.sun.tools.javac.Main',
-                          '/app/tools.jar:/files/',
-                          ...sourceFiles,
-                          '-d',
-                          '/files/',
-                          '-Xlint:-serial',
+                      for (const c of dirtyClasses) {
+                        const filename = `/str/${c}.java`
+                        cheerpOSAddStringFile(
+                          filename,
+                          encoder.encode(
+                            classes.find((el) => el.name == c)!.content,
+                          ),
                         )
-                        UIStore.update((s) => {
-                          s.controllerState = 'compile-or-run'
-                          s.dirtyClasses = []
-                          s.mainScriptDirty = false
-                        })
-                      }}
-                    >
-                      {dirtyClasses.length == 0 ? (
-                        'Hauptprogramm kompilieren'
-                      ) : (
-                        <>{dirtyClasses.length} Klassen kompilieren</>
-                      )}
-                    </button>
-                  </p>
-                ) : (
-                  <>
-                    <p>Bereit zum Ausführen</p>
-                    <p>
-                      <button
-                        onClick={async () => {
-                          document.getElementById('console')!.innerHTML = ''
-                          cheerpjRunMain('SyntheticMain', '/files/')
-                        }}
-                        className="px-2 py-0.5 bg-green-300 hover:bg-green-400 rounded"
-                      >
-                        START
-                      </button>
-                    </p>
-                  </>
-                )}
-              </>
+                        sourceFiles.push(filename)
+                      }
+                      UIStore.update((s) => {
+                        s.controllerState = 'compiling'
+                      })
+
+                      document.getElementById('console')!.innerHTML = ''
+                      /*const code =*/ await cheerpjRunMain(
+                        'com.sun.tools.javac.Main',
+                        '/app/tools.jar:/files/',
+                        ...sourceFiles,
+                        '-d',
+                        '/files/',
+                        '-Xlint:-serial',
+                      )
+                    }
+                    UIStore.update((s) => {
+                      s.controllerState = 'running'
+                      s.dirtyClasses = []
+                      s.instances = []
+                      s.inAction = false
+                    })
+                    document.getElementById('console')!.innerHTML = ''
+                    runtime.current.heap = {}
+                    await cheerpjRunMain('SyntheticMain', '/files/')
+                    UIStore.update((s) => {
+                      s.controllerState = 'compile-if-dirty'
+                      s.dirtyClasses = []
+                    })
+                  }}
+                >
+                  {dirtyClasses.length == 0 ? (
+                    'Ausführen'
+                  ) : (
+                    <>{dirtyClasses.length} Klassen kompilieren und ausführen</>
+                  )}
+                </button>
+              </p>
             )}
-          </div>
-          <div className="flex-1 bg-purple-50">
-            <p>HAUPTPROGRAMM SKRIPT (TEMPORÄR)</p>
-            <textarea
-              className="h-[150px] w-full mt-3"
-              value={mainScript}
-              onChange={(e) => {
-                const text = e.target.value
-                UIStore.update((s) => {
-                  s.mainScript = text
-                  s.mainScriptDirty = true
-                })
-              }}
-            ></textarea>
+            {controllerState === 'running' && (
+              <div>
+                <p>
+                  VM gestartet
+                  <button
+                    onClick={() => {
+                      runtime.current.exit()
+                    }}
+                    className="ml-6 px-2 py-0.5 bg-red-300 hover:bg-red-400 rounded"
+                  >
+                    VM zurücksetzen
+                  </button>
+                </p>
+                <div className="mt-3 flex flex-wrap justify-start">
+                  {interactiveElements.map((el, i) => (
+                    <button
+                      key={i}
+                      className="m-3 px-1 py-0.5 bg-gray-200 hover:bg-gray-300 rounded"
+                      onClick={el.action}
+                    >
+                      {el.code}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex-grow bg-teal-50">
           <pre
-            className="font-mono text-sm h-full overflow-auto"
+            className="font-mono text-sm h-full overflow-auto m-3"
             id="console"
           />
         </div>
-        <div
-          className={clsx(
-            'h-[400px] flex-grow-0',
-            controllerState !== 'compile-or-run' && 'opacity-0',
-          )}
-          ref={displayRef}
-        ></div>
+        <div className={clsx('h-[400px] flex-grow-0')} ref={displayRef}></div>
       </div>
     </>
   )
+
+  function prepareInteractiveMode() {
+    Object.values(classes).forEach((c) => {
+      const javaClassString = c.content
+      const classAPI: ClassAPI = {
+        hasPublicConstructor: false,
+        publicConstructorParams: [],
+        publicMethods: [],
+      }
+      // Regex für öffentlichen Konstruktor
+      const constructorRegex = new RegExp(
+        `public\\s+${c.name}\\s*\\(([^)]*)\\)`,
+      )
+      const constructorMatch = javaClassString.match(constructorRegex)
+
+      if (constructorMatch) {
+        classAPI.hasPublicConstructor = true
+        const params = constructorMatch[1].trim()
+        if (params.length > 0) {
+          classAPI.publicConstructorParams = params
+            .split(/\s*,\s*/)
+            .map((param) => {
+              const [type, name] = param.trim().split(/\s+/)
+              return { name, type }
+            })
+        }
+      }
+
+      // Regex für öffentliche Methoden
+      const methodRegex =
+        /public\s+([a-zA-Z0-9_<>\[\]]+)\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g
+      let methodMatch
+
+      while ((methodMatch = methodRegex.exec(javaClassString)) !== null) {
+        const returnType = methodMatch[1].trim()
+        const methodName = methodMatch[2].trim()
+        const params = methodMatch[3].trim()
+
+        const paramList =
+          params.length > 0
+            ? params.split(/\s*,\s*/).map((param) => {
+                const [type, name] = param.trim().split(/\s+/)
+                return { name, type }
+              })
+            : []
+
+        classAPI.publicMethods.push({
+          name: methodName,
+          returnType: returnType,
+          parameters: paramList,
+        })
+      }
+      UIStore.update((s) => {
+        s.api[c.name] = classAPI
+      })
+    })
+  }
 }

@@ -1,3 +1,4 @@
+import { IUIStore } from '@/data/types'
 import { UIStore } from '@/store'
 import {
   Background,
@@ -6,25 +7,39 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react'
+import clsx from 'clsx'
+import { useCallback, useEffect } from 'react'
 
 export function ClassDiagram() {
   const classes = UIStore.useState((s) => s.classes)
+  const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
 
-  const [nodes, , onNodesChange] = useNodesState(
-    classes.map((c, i) => ({
-      id: i.toString(),
-      type: 'SingleClass',
-      data: { label: c.name },
-      position: { x: c.position.x, y: c.position.y },
-      style: {
-        background: '#fff',
-        border: '1px solid black',
-        fontSize: 12,
-        ...(c.size ?? {}),
-      },
-    })),
+  const classToNode = useCallback(
+    (c: IUIStore['classes'][number], i: number) => {
+      return {
+        id: i.toString(),
+        type: 'SingleClass',
+        data: { label: c.name, dirty: dirtyClasses.includes(c.name) },
+        position: { x: c.position.x, y: c.position.y },
+        style: {
+          background: '#fff',
+          border: '1px solid black',
+          fontSize: 14,
+          ...(c.size ?? {}),
+        },
+      }
+    },
+    [dirtyClasses],
+  )
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    classes.map(classToNode),
   )
   const [edges, , onEdgesChange] = useEdgesState([])
+
+  useEffect(() => {
+    setNodes(classes.map(classToNode))
+  }, [classToNode, classes, dirtyClasses, setNodes])
 
   return (
     <ReactFlow
@@ -49,7 +64,13 @@ export function ClassDiagram() {
   )
 }
 
-const SingleClass = ({ data, id }: { data: { label: string }; id: string }) => {
+const SingleClass = ({
+  data,
+  id,
+}: {
+  data: { label: string; dirty: boolean }
+  id: string
+}) => {
   return (
     <>
       <NodeResizeControl
@@ -69,21 +90,30 @@ const SingleClass = ({ data, id }: { data: { label: string }; id: string }) => {
       >
         <ResizeIcon />
       </NodeResizeControl>
-      <div className="p-3 pr-6 pb-6">
-        <p>{data.label}</p>
-        <button
-          className="underline"
-          onClick={() => {
-            UIStore.update((s) => {
-              if (!s.openClasses.includes(data.label)) {
-                s.openClasses.push(data.label)
-              }
-              s.openClass = data.label
-            })
-          }}
+      <div className="">
+        <p
+          className={clsx(
+            'border-b text-center pt-1 pb-1 border-black',
+            data.dirty && 'bg-orange-500',
+          )}
         >
-          Bearbeiten
-        </button>
+          {data.label}
+        </p>
+        <div className={clsx('pl-2 pt-1 pb-6 pr-6')}>
+          <button
+            className="underline"
+            onClick={() => {
+              UIStore.update((s) => {
+                if (!s.openClasses.includes(data.label)) {
+                  s.openClasses.push(data.label)
+                }
+                s.openClass = data.label
+              })
+            }}
+          >
+            Bearbeiten
+          </button>
+        </div>
       </div>
     </>
   )

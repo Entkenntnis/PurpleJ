@@ -5,3 +5,7 @@
 /*.cheerpjNC::before {
   content: '' !important;
 }*/
+
+.cheerpjLoading {
+  background: none !important;
+}
