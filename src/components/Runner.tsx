@@ -137,6 +137,9 @@ export function Runner() {
                   //await circle.makeVisible()
                   runtime.current.lib = lib
                   prepareInteractiveMode()
+                  UIStore.update((s) => {
+                    s.inAction = false
+                  })
                   await new Promise((res) => {
                     runtime.current.exit = () => {
                       res(null)
@@ -159,7 +162,7 @@ export function Runner() {
         />
       )}
       <div className="h-full flex flex-col">
-        <div className="flex-grow-0 h-[350px] flex">
+        <div className="flex-grow flex overflow-auto">
           <div
             className={clsx(
               'flex-1 p-3 bg-yellow-50 overflow-auto',
@@ -167,10 +170,10 @@ export function Runner() {
             )}
           >
             {controllerState === 'loading' && (
-              <p>Java-System wird geladen ...</p>
+              <p className="animate-pulse">Java-System wird geladen ...</p>
             )}
             {controllerState === 'compiling' && (
-              <p>Klassen werden kompiliert ...</p>
+              <p className="animate-pulse">Klassen werden kompiliert ...</p>
             )}
             {controllerState === 'compile-if-dirty' && (
               <p>
@@ -223,14 +226,14 @@ export function Runner() {
                       s.controllerState = 'running'
                       s.dirtyClasses = []
                       s.instances = []
-                      s.inAction = false
+                      s.inAction = true
+                      s.api = {}
                     })
                     document.getElementById('console')!.innerHTML = ''
                     runtime.current.heap = {}
                     await cheerpjRunMain('SyntheticMain', '/files/')
                     UIStore.update((s) => {
                       s.controllerState = 'compile-if-dirty'
-                      s.dirtyClasses = []
                     })
                   }}
                 >
@@ -259,8 +262,15 @@ export function Runner() {
                   {interactiveElements.map((el, i) => (
                     <button
                       key={i}
-                      className="m-3 px-1 py-0.5 bg-gray-200 hover:bg-gray-300 rounded"
-                      onClick={el.action}
+                      className={clsx(
+                        'm-1 px-1 py-0.5 bg-gray-200 rounded',
+                        inAction ? 'cursor-default' : 'hover:bg-gray-300',
+                      )}
+                      onClick={() => {
+                        if (!inAction) {
+                          el.action()
+                        }
+                      }}
                     >
                       {el.code}
                     </button>
@@ -270,11 +280,8 @@ export function Runner() {
             )}
           </div>
         </div>
-        <div className="flex-grow bg-teal-50">
-          <pre
-            className="font-mono text-sm h-full overflow-auto m-3"
-            id="console"
-          />
+        <div className="h-[200px] bg-teal-50 overflow-auto">
+          <pre className="font-mono text-sm h-full m-3" id="console" />
         </div>
         <div className={clsx('h-[400px] flex-grow-0')} ref={displayRef}></div>
       </div>
