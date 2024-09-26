@@ -31,8 +31,8 @@ export function Home() {
           </p>
           <p className="mt-3">Steige ein mit einem dieser Projekte:</p>
           <ul className="mt-3 list-disc list-inside">
-            {renderLink('Figuren (übernommen von BlueJ)', figures)}
-            {renderLink('Helden-Abenteuer (WIP)', dungeon)}
+            {renderLink('Figuren (übernommen von BlueJ)', figures, 'display')}
+            {renderLink('Helden-Abenteuer (WIP)', dungeon, 'terminal')}
           </ul>
           <p className="mt-[200px]">
             Das Projekt wird ermöglicht durch Technologie von{' '}
@@ -55,7 +55,11 @@ export function Home() {
     </>
   )
 
-  function renderLink(name: string, classes: IUIStore['classes']) {
+  function renderLink(
+    name: string,
+    classes: IUIStore['classes'],
+    output: 'terminal' | 'display',
+  ) {
     return (
       <li
         className="text-purple-600 hover:underline cursor-pointer"
@@ -66,6 +70,7 @@ export function Home() {
             s.openClass = null
             s.openClasses = []
             s.page = 'ide'
+            s.output = output
           })
         }}
       >

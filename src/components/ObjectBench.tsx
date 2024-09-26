@@ -11,7 +11,7 @@ export function ObjectBench() {
   const runtime = useJavaRuntime()
 
   return (
-    <div className="h-full overflow-auto">
+    <div className={clsx('h-full overflow-auto', inAction && 'cursor-wait')}>
       {controllerState === 'loading' && (
         <div className="flex justify-center items-center h-full">
           <p className="italic text-gray-600 pb-6 animate-pulse">
@@ -82,7 +82,7 @@ export function ObjectBench() {
                   key={i}
                   className={clsx(
                     'm-1 px-1 py-0.5 bg-gray-200 rounded',
-                    inAction ? 'cursor-default' : 'hover:bg-gray-300',
+                    inAction ? 'cursor-wait' : 'hover:bg-gray-300',
                   )}
                   onClick={() => {
                     if (!inAction) {

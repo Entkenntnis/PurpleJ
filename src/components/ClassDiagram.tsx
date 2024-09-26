@@ -93,12 +93,12 @@ const SingleClass = ({
       >
         <ResizeIcon />
       </NodeResizeControl>
-      <div className="">
+      <div className="h-full">
         <p className={clsx('border-b text-center pt-1 pb-1 border-black')}>
           {data.label}
         </p>
         <div
-          className={clsx('pl-2 pt-1 pb-6 pr-6')}
+          className={clsx('pl-2 pt-1 pb-6 pr-6 h-full')}
           style={
             data.dirty
               ? {
