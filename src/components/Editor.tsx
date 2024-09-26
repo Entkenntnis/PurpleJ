@@ -1,4 +1,4 @@
-import { UIStore } from '@/store'
+import { UIStore } from '@/store/UIStore'
 import { EditorView, basicSetup } from 'codemirror'
 import { keymap } from '@codemirror/view'
 import { indentWithTab } from '@codemirror/commands'

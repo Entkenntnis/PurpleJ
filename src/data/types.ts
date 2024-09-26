@@ -7,8 +7,6 @@ export interface IUIStore {
   }[]
   openClasses: string[]
   openClass: string | null
-  controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
-  cheerpjUrl: string
   dirtyClasses: string[]
   api: { [key: string]: ClassAPI }
   instances: { name: string; type: string }[]
@@ -18,11 +16,14 @@ export interface IUIStore {
 }
 
 export interface Runtime {
+  compileAndRun: () => void
+  getInteractiveElements(): InteractiveElement[]
   exit: () => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lib: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   heap: { [key: string]: any }
+  displayElement: HTMLDivElement | null
 }
 
 export interface ClassAPI {
@@ -33,4 +34,14 @@ export interface ClassAPI {
     returnType: string
     parameters: { name: string; type: string }[]
   }[]
+}
+
+export interface IVMStore {
+  cheerpjUrl: string
+  controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
+}
+
+export interface InteractiveElement {
+  code: string
+  action: () => void
 }

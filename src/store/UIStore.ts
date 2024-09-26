@@ -5,8 +5,6 @@ export const UIStore = new Store<IUIStore>({
   classes: [],
   openClasses: [],
   openClass: null,
-  controllerState: 'loading',
-  cheerpjUrl: '',
   dirtyClasses: [],
   api: {},
   instances: [],

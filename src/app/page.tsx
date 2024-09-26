@@ -2,10 +2,16 @@
 
 import { Home } from '@/components/Home'
 import IDE from '@/components/IDE'
-import { UIStore } from '@/store'
+import { JavaRuntime } from '@/components/JavaRuntime'
+import { UIStore } from '@/store/UIStore'
 
 export default function Page() {
   const page = UIStore.useState((s) => s.page)
-  if (page == 'home') return <Home />
-  if (page == 'ide') return <IDE />
+
+  return (
+    <JavaRuntime>
+      {page == 'home' && <Home />}
+      {page == 'ide' && <IDE />}
+    </JavaRuntime>
+  )
 }

@@ -1,9 +1,8 @@
 import { IUIStore } from '@/data/types'
-import { UIStore } from '@/store'
+import { UIStore } from '@/store/UIStore'
 import {
   Background,
   NodeResizeControl,
-  Panel,
   ReactFlow,
   useEdgesState,
   useNodesState,
@@ -45,61 +44,26 @@ export function ClassDiagram() {
   }, [classToNode, classes, dirtyClasses, setNodes])
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="h-[calc(100%-120px)]">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={(e) => {
-            for (const event of e) {
-              if (event.type == 'position' && !event.dragging) {
-                UIStore.update((s) => {
-                  s.classes.find(
-                    (_, i) => i.toString() === event.id,
-                  )!.position = event.position!
-                })
-              }
-            }
-            onNodesChange(e)
-          }}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={{ SingleClass }}
-          proOptions={proOptions}
-        >
-          <Panel position="top-right">
-            <button
-              className="px-2 py-0.5 bg-green-200 hover:bg-green-300 rounded text-center"
-              onClick={() => {
-                const name =
-                  prompt('Welchen Namen soll die Klasse haben?') ?? 'NeueKlasse'
-                UIStore.update((s) => {
-                  s.classes.push({
-                    name,
-                    content: `public class ${name} {
-    public ${name} () {
-        
-    }
-}`,
-                    position: {
-                      x: Math.random() * 300,
-                      y: Math.random() * 300,
-                    },
-                  })
-                })
-              }}
-            >
-              Klasse
-              <br />
-              hinzufügen
-            </button>
-          </Panel>
-          <Background />
-        </ReactFlow>
-      </div>
-      <div className="h-[120px] border-t-2 border-purple-300 items-center justify-center flex">
-        <span className="italic text-gray-600">TODO: Objekt-Leiste</span>
-      </div>
-    </div>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={(e) => {
+        for (const event of e) {
+          if (event.type == 'position' && !event.dragging) {
+            UIStore.update((s) => {
+              s.classes.find((_, i) => i.toString() === event.id)!.position =
+                event.position!
+            })
+          }
+        }
+        onNodesChange(e)
+      }}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={{ SingleClass }}
+      proOptions={proOptions}
+    >
+      <Background />
+    </ReactFlow>
   )
 }
 

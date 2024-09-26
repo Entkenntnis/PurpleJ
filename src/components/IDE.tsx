@@ -1,14 +1,18 @@
 import { ClassDiagram } from '@/components/ClassDiagram'
 import { Editor } from '@/components/Editor'
 import { Runner } from '@/components/Runner'
-import { UIStore } from '@/store'
+import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
 import { ArrowLeft } from 'lucide-react'
+import { useJavaRuntime } from './JavaRuntime'
+import { ObjectBench } from './ObjectBench'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
   const openClass = UIStore.useState((s) => s.openClass)
   const output = UIStore.useState((s) => s.output)
+
+  const runtime = useJavaRuntime()
 
   return (
     <>
@@ -18,8 +22,10 @@ export default function IDE() {
             <button
               className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded"
               onClick={() => {
-                // currently, I can't really handle runtime reuse properly
-                window.location.reload()
+                runtime.getRuntime().exit()
+                UIStore.update((s) => {
+                  s.page = 'home'
+                })
               }}
             >
               <ArrowLeft className="inline-block w-3" /> zurück
@@ -71,6 +77,30 @@ export default function IDE() {
                 </button>
               </div>
             ))}
+            <button
+              className="px-2 py-0.5 bg-yellow-100 hover:bg-yellow-200 rounded ml-4"
+              onClick={() => {
+                const name = prompt('Welchen Namen soll die Klasse haben?')
+                if (name) {
+                  UIStore.update((s) => {
+                    s.classes.push({
+                      name,
+                      content: `public class ${name} {
+  public ${name} () {
+      
+  }
+}`,
+                      position: {
+                        x: Math.random() * 300,
+                        y: Math.random() * 300,
+                      },
+                    })
+                  })
+                }
+              }}
+            >
+              + Neue Klasse
+            </button>
           </div>
           <div className="pr-4">
             Ausgabe:{' '}
@@ -89,8 +119,15 @@ export default function IDE() {
           </div>
         </div>
         <div className="h-[calc(100%-44px)] flex">
-          <div className="w-[calc(100%-500px)] h-full">
-            {openClass == null ? <ClassDiagram /> : <Editor />}
+          <div className="w-[calc(100%-500px)] h-full border-r-2 border-purple-300">
+            <div className="flex flex-col h-full">
+              <div className="h-[calc(100%-120px)]">
+                {openClass == null ? <ClassDiagram /> : <Editor />}
+              </div>
+              <div className="h-[120px] border-t-2 border-purple-300">
+                <ObjectBench />
+              </div>
+            </div>
           </div>
           <div className="w-[500px]">
             <Runner />

@@ -1,7 +1,7 @@
 import { dungeon } from '@/content/dungeon'
 import { figures } from '@/content/figures'
 import { IUIStore } from '@/data/types'
-import { UIStore } from '@/store'
+import { UIStore } from '@/store/UIStore'
 
 export function Home() {
   return (
@@ -62,7 +62,6 @@ export function Home() {
         onClick={() => {
           UIStore.update((s) => {
             s.classes = classes
-            s.controllerState = 'loading'
             s.dirtyClasses = classes.map((c) => c.name)
             s.openClass = null
             s.openClasses = []
