@@ -5,8 +5,8 @@ import './globals.css'
 import '@xyflow/react/dist/style.css'
 
 export const metadata: Metadata = {
-  title: 'BlueJ Online',
-  description: 'an experiment',
+  title: 'PurpleJ',
+  description: 'BlueJ for the browser',
 }
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className="h-full">
-      <body className={clsx('antialiased h-full')}>{children}</body>
+      <body className="h-full">{children}</body>
     </html>
   )
 }
