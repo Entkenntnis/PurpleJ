@@ -134,7 +134,7 @@ export function Runner() {
                   console.log(lib)*/
                   //const circle = await lib.Circle.getInstance()
                   //await circle.makeVisible()
-                  // @ts-expect-error
+                  // @ts-expect-error Expose to client
                   window.lib = lib
                   runtime.current.lib = lib
                   prepareInteractiveMode()

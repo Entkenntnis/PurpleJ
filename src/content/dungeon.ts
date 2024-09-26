@@ -19,14 +19,14 @@ class DUNGEON{
     static DUNGEON dungeon;
     private int angriffe;
 
-    DUNGEON(){
+    public DUNGEON (){
         this(null);
     }
 
     private DUNGEON(HELD h){
         held = h;
         texteLesen();
-        new java.util.Timer().schedule( 
+        /*new java.util.Timer().schedule( 
             new java.util.TimerTask() {
                 @Override
                 public void run() {
@@ -35,7 +35,8 @@ class DUNGEON{
                 }
             }, 
             500 
-        );
+        );*/
+        spielStarten();
         dungeon = this;
     }
     
