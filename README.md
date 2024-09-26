@@ -1,2 +1,3 @@
-# bluej-online
-well, let's see how far this goes
+# PurpleJ
+
+Objekt-orientierte Programmierung mit Java im Browser

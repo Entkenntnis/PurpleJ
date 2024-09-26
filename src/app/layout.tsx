@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import clsx from 'clsx'
 
 import './globals.css'
 import '@xyflow/react/dist/style.css'
 
 export const metadata: Metadata = {
   title: 'PurpleJ',
-  description: 'BlueJ for the browser',
+  description: 'Objekt-orientierte Programmierung mit Java im Browser',
 }
 
 export default function RootLayout({

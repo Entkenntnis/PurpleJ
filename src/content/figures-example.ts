@@ -1,4 +1,4 @@
-import { IUIStore } from './types'
+import { IUIStore } from '@/data/types'
 
 export const figuresExample: IUIStore['classes'] = [
   {

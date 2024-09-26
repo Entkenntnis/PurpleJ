@@ -1,6 +1,6 @@
 import { Store } from 'pullstate'
 import { IUIStore } from '../data/types'
-import { figuresExample } from '../data/figures-example'
+import { figuresExample } from '@/content/figures-example'
 
 export const UIStore = new Store<IUIStore>({
   classes: figuresExample,
