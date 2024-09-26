@@ -14,6 +14,7 @@ export interface IUIStore {
   instances: { name: string; type: string }[]
   inAction: boolean
   page: 'home' | 'ide'
+  output: 'display' | 'terminal'
 }
 
 export interface Runtime {

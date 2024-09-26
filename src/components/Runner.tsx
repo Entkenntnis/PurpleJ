@@ -13,6 +13,7 @@ export function Runner() {
   const displayRef = useRef<HTMLDivElement>(null)
   const instances = UIStore.useState((s) => s.instances)
   const inAction = UIStore.useState((s) => s.inAction)
+  const output = UIStore.useState((s) => s.output)
   useEffect(() => {
     if (controllerState === 'loading' && !cheerpjUrl) {
       void (async () => {
@@ -163,6 +164,18 @@ export function Runner() {
         />
       )}
       <div className="h-full flex flex-col">
+        <div
+          className={clsx('h-[360px]', output !== 'display' && 'hidden')}
+          ref={displayRef}
+        ></div>
+        <div
+          className={clsx(
+            'h-[360px] bg-teal-50 overflow-auto',
+            output !== 'terminal' && 'hidden',
+          )}
+        >
+          <pre className="font-mono text-sm h-full m-3" id="console" />
+        </div>
         <div className="flex-grow flex overflow-auto">
           <div
             className={clsx(
@@ -300,10 +313,6 @@ export function Runner() {
             )}
           </div>
         </div>
-        <div className="h-[200px] bg-teal-50 overflow-auto">
-          <pre className="font-mono text-sm h-full m-3" id="console" />
-        </div>
-        <div className={clsx('h-[400px] flex-grow-0')} ref={displayRef}></div>
       </div>
     </>
   )

@@ -3,12 +3,15 @@ import { UIStore } from '@/store'
 import {
   Background,
   NodeResizeControl,
+  Panel,
   ReactFlow,
   useEdgesState,
   useNodesState,
 } from '@xyflow/react'
 import clsx from 'clsx'
 import { useCallback, useEffect } from 'react'
+
+const proOptions = { hideAttribution: true }
 
 export function ClassDiagram() {
   const classes = UIStore.useState((s) => s.classes)
@@ -42,25 +45,57 @@ export function ClassDiagram() {
   }, [classToNode, classes, dirtyClasses, setNodes])
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={(e) => {
-        for (const event of e) {
-          if (event.type == 'position' && !event.dragging) {
-            UIStore.update((s) => {
-              s.classes.find((_, i) => i.toString() === event.id)!.position =
-                event.position!
-            })
-          }
-        }
-        onNodesChange(e)
-      }}
-      onEdgesChange={onEdgesChange}
-      nodeTypes={{ SingleClass }}
-    >
-      <Background />
-    </ReactFlow>
+    <div className="flex flex-col h-full">
+      <div className="h-[calc(100%-120px)]">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={(e) => {
+            for (const event of e) {
+              if (event.type == 'position' && !event.dragging) {
+                UIStore.update((s) => {
+                  s.classes.find(
+                    (_, i) => i.toString() === event.id,
+                  )!.position = event.position!
+                })
+              }
+            }
+            onNodesChange(e)
+          }}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={{ SingleClass }}
+          proOptions={proOptions}
+        >
+          <Panel position="top-right">
+            <button
+              className="px-2 py-0.5 bg-green-200 hover:bg-green-300 rounded text-center"
+              onClick={() => {
+                const name =
+                  prompt('Welchen Namen soll die Klasse haben?') ?? 'NeueKlasse'
+                UIStore.update((s) => {
+                  s.classes.push({
+                    name,
+                    content: ``,
+                    position: {
+                      x: Math.random() * 300,
+                      y: Math.random() * 300,
+                    },
+                  })
+                })
+              }}
+            >
+              Klasse
+              <br />
+              hinzufügen
+            </button>
+          </Panel>
+          <Background />
+        </ReactFlow>
+      </div>
+      <div className="h-[120px] border-t-2 border-purple-300 items-center justify-center flex">
+        <span className="italic text-gray-600">TODO: Objekt-Leiste</span>
+      </div>
+    </div>
   )
 }
 
@@ -91,15 +126,25 @@ const SingleClass = ({
         <ResizeIcon />
       </NodeResizeControl>
       <div className="">
-        <p
-          className={clsx(
-            'border-b text-center pt-1 pb-1 border-black',
-            data.dirty && 'bg-orange-500',
-          )}
-        >
+        <p className={clsx('border-b text-center pt-1 pb-1 border-black')}>
           {data.label}
         </p>
-        <div className={clsx('pl-2 pt-1 pb-6 pr-6')}>
+        <div
+          className={clsx('pl-2 pt-1 pb-6 pr-6')}
+          style={
+            data.dirty
+              ? {
+                  background: `repeating-linear-gradient(
+            45deg,
+            #e9d5ff,
+            #e9d5ff 10px,
+            #c4b5fd 10px,
+            #c4b5fd 20px
+          )`,
+                }
+              : {}
+          }
+        >
           <button
             className="underline"
             onClick={() => {
@@ -112,6 +157,26 @@ const SingleClass = ({
             }}
           >
             Bearbeiten
+          </button>
+          <br />
+          <button
+            className="underline"
+            onClick={() => {
+              const result = confirm('Klasse wirklich löschen?')
+              if (result) {
+                UIStore.update((s) => {
+                  s.classes = s.classes.filter((el) => el.name !== data.label)
+                  s.openClasses = s.openClasses.filter(
+                    (el) => el !== data.label,
+                  )
+                  s.dirtyClasses = s.dirtyClasses.filter(
+                    (el) => el !== data.label,
+                  )
+                })
+              }
+            }}
+          >
+            Entfernen
           </button>
         </div>
       </div>

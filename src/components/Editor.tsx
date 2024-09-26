@@ -44,7 +44,5 @@ export function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openClass])
 
-  return (
-    <div ref={editorDiv} className="max-h-[calc(100vh-52px)] overflow-auto" />
-  )
+  return <div ref={editorDiv} className="h-full overflow-auto" />
 }

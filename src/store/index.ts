@@ -12,4 +12,5 @@ export const UIStore = new Store<IUIStore>({
   instances: [],
   inAction: false,
   page: 'home',
+  output: 'terminal',
 })
