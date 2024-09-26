@@ -5,7 +5,6 @@ import { useJavaRuntime } from './JavaRuntime'
 
 export function Runner() {
   const displayRef = useRef<HTMLDivElement>(null)
-  const inAction = UIStore.useState((s) => s.inAction)
   const output = UIStore.useState((s) => s.output)
 
   const runtime = useJavaRuntime()
