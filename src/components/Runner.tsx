@@ -174,7 +174,10 @@ export function Runner() {
             output !== 'terminal' && 'hidden',
           )}
         >
-          <pre className="font-mono text-sm h-full m-3" id="console" />
+          <pre
+            className="font-mono text-sm h-full px-1 text-wrap"
+            id="console"
+          />
         </div>
         <div className="flex-grow flex overflow-auto">
           <div

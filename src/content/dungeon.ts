@@ -11,6 +11,8 @@ import java.io.PrintStream;
 
 /**
  * Organisiert den ganzen Spielablauf und alle Erklärtexte
+ * 
+ * @author Philipp Dippon
  */
 
 class DUNGEON{
