@@ -13,6 +13,7 @@ export interface IUIStore {
   api: { [key: string]: ClassAPI }
   instances: { name: string; type: string }[]
   inAction: boolean
+  page: 'home' | 'ide'
 }
 
 export interface Runtime {

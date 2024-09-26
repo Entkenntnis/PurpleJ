@@ -1,6 +1,6 @@
 import { IUIStore } from '@/data/types'
 
-export const figuresExample: IUIStore['classes'] = [
+export const figures: IUIStore['classes'] = [
   {
     name: 'Canvas',
     position: { x: 50, y: 50 },
