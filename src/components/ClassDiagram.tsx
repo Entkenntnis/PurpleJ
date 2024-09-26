@@ -75,7 +75,11 @@ export function ClassDiagram() {
                 UIStore.update((s) => {
                   s.classes.push({
                     name,
-                    content: ``,
+                    content: `public class ${name} {
+    public ${name} () {
+        
+    }
+}`,
                     position: {
                       x: Math.random() * 300,
                       y: Math.random() * 300,

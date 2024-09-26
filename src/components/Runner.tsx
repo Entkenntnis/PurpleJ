@@ -264,6 +264,7 @@ export function Runner() {
                     })
                     document.getElementById('console')!.innerHTML = ''
                     runtime.current.heap = {}
+                    prepareInteractiveMode()
                     await cheerpjRunMain('SyntheticMain', '/files/')
                     UIStore.update((s) => {
                       s.controllerState = 'compile-if-dirty'
