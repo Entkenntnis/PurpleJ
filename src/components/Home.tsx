@@ -1,4 +1,5 @@
-import { figures } from '@/content/figures-example'
+import { dungeon } from '@/content/dungeon'
+import { figures } from '@/content/figures'
 import { IUIStore } from '@/data/types'
 import { UIStore } from '@/store'
 
@@ -31,6 +32,7 @@ export function Home() {
           <p className="mt-3">Steige ein mit einem dieser Projekte:</p>
           <ul className="mt-3 list-disc list-inside">
             {renderLink('Figuren (übernommen von BlueJ)', figures)}
+            {renderLink('Helden-Abenteuer', dungeon)}
           </ul>
           <p className="mt-[200px]">
             Das Projekt wird ermöglicht durch Technologie von{' '}

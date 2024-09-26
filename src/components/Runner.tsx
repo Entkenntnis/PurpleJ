@@ -131,10 +131,11 @@ export function Runner() {
               natives: {
                 async Java_SyntheticMain_entry(lib: object) {
                   /*console.log('Hi!')
-                  window.lib = lib
                   console.log(lib)*/
                   //const circle = await lib.Circle.getInstance()
                   //await circle.makeVisible()
+                  // @ts-expect-error
+                  window.lib = lib
                   runtime.current.lib = lib
                   prepareInteractiveMode()
                   UIStore.update((s) => {
@@ -195,7 +196,20 @@ export function Runner() {
                               System.exit(0);
                             }
                             public static native void entry();
+
+                            public static void test() {
+                              System.out.println("Das ist eine Textnachricht");
+                            }
                           }`),
+                      )
+
+                      cheerpOSAddStringFile(
+                        `/str/Data/Hilfen.txt`,
+                        encoder.encode(Hilfen),
+                      )
+                      cheerpOSAddStringFile(
+                        `/str/Data/Anleitungstexte.txt`,
+                        encoder.encode(Anleitungen),
                       )
 
                       for (const c of dirtyClasses) {
@@ -213,7 +227,7 @@ export function Runner() {
                       })
 
                       document.getElementById('console')!.innerHTML = ''
-                      /*const code =*/ await cheerpjRunMain(
+                      const code = await cheerpjRunMain(
                         'com.sun.tools.javac.Main',
                         '/app/tools.jar:/files/',
                         ...sourceFiles,
@@ -221,6 +235,12 @@ export function Runner() {
                         '/files/',
                         '-Xlint:-serial',
                       )
+                      if (code !== 0) {
+                        UIStore.update((s) => {
+                          s.controllerState = 'compile-if-dirty'
+                        })
+                        return
+                      }
                     }
                     UIStore.update((s) => {
                       s.controllerState = 'running'
@@ -345,3 +365,194 @@ export function Runner() {
     })
   }
 }
+
+const Hilfen = `Erstelle zuerst eine neue Klasse und gib als Namen eine von dir gewählte
+Heldenkategorie in Großbuchstaben an (z.B: ZWERG, DIEB, ...)
+Wähle dann mit Rechtsklick Bearbeiten aus und lösche den gesamten Inhalt.
+Schreibe nur folgenden Code hinein:
+
+class DEINKLASSENNAME extends HELD{
+
+}
+
+Bearbeite jetzt die Arbeitsblatt Aufgabe 1!
+
+Erstelle ab jetzt immer ein neues Objekt deines selbstgeschriebenen Heldens.
+Dann wird dir die nächste Geschichte angezeigt.
+#
+Überlege dir sinnvolle Eigenschaften deines Heldens. 
+ Möglichkeiten sind Name, Stärke, ... Wähle jeweils einen passenden Datentyp aus
+ wie du sie bereits auf dem Arbeitsblatt aufgelistet hast.
+#
+Der Datentyp ist int und der Name muss genau so geschrieben sein: 'leben'.
+#
+Mögliche Methodennamen könnten z.B.: 'essen', 'warten', 'singen', 'neuerNameSetzen' usw. sein.
+Du findest Ideen, wenn du überlegst, welche Attribute sich ändern könnten. Achte auf die richtigen Klammern.
+#
+Methodenname: 'heilen'. Statt einen Wert zu setzen, kannst du ihn mit folgenden Beispielen vergrößern/verkleinern.
+x = x + 1;   x = x - 1;
+#
+Zum Überschreiben der Methode, kopiere einfach die Methode 'ducken' aus HELD in deine Klasse
+und ändere sie so ab, dass die Rückgabe wahr ist.
+#
+Methoden mit Rückgabewerten haben zwei Kriterien:
+Statt void steht dort ein beliebiger Datentyp und es kommt return vor.
+#
+Beachte, dass du beim Überschreiben die Methode genau gleich übernehmen musst.
+Nur die Rückgabe (steht hinter return) solltest du zu dem Wort 'springen' ändern.
+#
+Deine Methode muss nach folgendem Pseudocode funktionieren:
+  Wenn ( hindernis ist gleich 'Monster') dann
+    Gib 'schleichen' zurück
+  sonst
+    Gib 'springen' zurück
+  ende wenn
+Wie du das programmierst, kannst du auch im Internet heraus finden.
+#
+Möglicher Pseudocode:
+  Wenn ( hindernis ist gleich 'Monster') dann
+    Gib 'schleichen' zurück
+  sonst
+    Wenn (hindernis ist gleich 'Tür') dann
+      Gib 'öffnen' zurück
+    sonst
+      Gib 'springen' zurück
+    ende wenn
+  ende wenn
+#
+Ein Methodenaufruf ist immer eine Zeile der Form 'this.methodenname()'.
+Wenn du beim Eingeben nach dem Punkt die Tastenkombination Strg+Leertaste drückst,
+dann werden dir alle verfügbaren Methoden angezeigt.
+Wähle die Methode zum Angreifen aus.
+#
+Für begegnungMit kannst du folgende Idee verwenden:
+  Wenn (hindernis ist gleich 'Gegner') dann
+    rufe Methode kaempfen auf
+    gib 'Attacke!' zurück
+  sonst
+    --alles was vorher in der Methode stand--
+  ende wenn`
+
+const Anleitungen = `Willkommen in der Heldenvorbereitung. Hier steht immer, was du tun musst.
+Als erstes wirst du einen eigenen Helden erschaffen.
+Verwende die Hilfe, um dafür eine neue Unterklasse von HELD (z.B: KRIEGER, ZAUBERER, ...) 
+zu erstellen.
+
+Die Hilfetexte findest du so:
+Klicke jetzt mit Rechtsklick auf das rote Objekt unter den Klassen und führe 
+die Methode 'hilfe' mit dem Code 111 aus. Dort erfährst du wie es weitergeht.
+#
+Sehr gut. Als nächstes braucht deine neue Klasse einige Eigenschaften.
+-> Bearbeite vom Aufgabenblatt die Nummer 2!
+Ergänze danach mehrere Attribute in deiner Klasse und starte neu.
+Die Hilfe befindet sich jetzt unter Rechtsklick "geerbt von HELD".
+Falls du Hilfe brauchst verwende den Code: 112.
+#
+Prima. Ergänze zusätzlich ein ganzzahliges Attribut 'leben', damit du dort seine 
+Lebenspunkte speichern kannst. (Hilfe unter 121)
+#
+Ohje! Einige seiner Werte sind noch auf 0!! Das muss schnell geändert werden.
+-> Bearbeite zuerst vom Aufgabenblatt Aufgabe 4 (!!).
+Ergänze nun auf die gleiche Art sinnvolle Startwerte für alle deine Attribute.
+#
+Dein Held sollte auch etwas machen können! Schreibe ihm dafür eine Methode.
+Einfache Methoden haben immer den folgenden Aufbau:
+void methodenname(){
+
+}
+
+(Hilfe unter 133)
+#
+Hmmm! Die Methode ist da, macht aber noch nichts.
+-> Bearbeite jetzt Aufgabe 5 auf dem Blatt.
+Ändere danach die Methode so, dass sie sinnvoll Attributwerte verändert!
+#
+Letzte Vorbereitung: Dein Held benötigt noch eine weitere Methode 'heilen'. 
+Diese soll seine Lebenspunkte genau um 2 erhöhen. (Hilfe unter 143)
+#
+Jeah! Damit bist du bereit für den Dungeon!
+Um den Dungeon zu betreten, zeige dein Heft mit Arbeitsblatt vorne der Lehrkraft.
+
+Bonus für Schnelle: Schreibe eine Methode 'aufleveln', die alle Attribute verändert (und ggf. verbessert).
+###
+Ohje, dein Held ist voll gegen die Wand gelaufen. Das mit dem Ducken scheint noch nicht 
+zu klappen. Woher kann er das überhaupt? Schau in die Oberklasse HELD und finde die 
+Methode. Diese sollte auch erklären, warum das nicht klappt. Leider darfst du 
+die Oberklasse nicht verändern.
+ -> Bearbeite Aufgabenblatt Nummer 7!
+Überschreibe danach die Methode in deiner Unterklasse und ändere ihren Rückgabewert, 
+sodass er sich ducken kann. (Hilfe unter 241)
+#
+Dein Held ist so stolz, dass er es reingeschafft hat, dass er gleich etwas sagen muss.
+Schreibe ihm eine Methode 'freuen' mit einem freudigen Text als Rückgabewert.
+-> Bearbeite dann Aufgabenblatt Nummer 8. (Hilfe unter 244)
+#
+Mist. Jetzt steht dein Held vor dem Spalt und bewegt sich nicht weiter. So wird das nichts.
+Schau wieder in die Klasse HELD. Hier findest du die Methode, die für die 'nichts'-Reaktion
+verantwortlich ist. 
+Überschreibe sie in deiner Unterklasse, sodass sie 'springen' zurück gibt.
+(Hilfe unter 259)
+#
+Verflixt! Davon wurde das Monster wach. Dein Held hatte keine Chance...
+An diesem Ungetüm kann man sich nur vorbei schleichen. Doch was passiert wenn du einfach
+'schleichen' statt 'springen' zurück gibst? Wenn du dir nicht sicher bist, probiere es aus!
+#
+Schau dir die Methode 'begegnungMit' genau an. Worin unterscheidet sie sich von den anderen?
+-> Bearbeite jetzt Aufgabenblatt Nummer 9.
+Der Parameter 'hindernis' sollte dir helfen. Lass dir als erstes seine Werte anzeigen, 
+indem du die folgende Zeile über 'return' abschreibst und neu startest:
+  System.out.println("Schau HIER: " + hindernis);
+
+Starte neu! Siehst du oben die neuen Ausgaben? Der Parameter ist wirklich jedes mal anders.
+-> Bearbeite auch noch Aufgabenblatt Nummer 10.
+Schreibe dann eine Bedingung, sodass der Held schleicht, wenn er auf das Monster trifft 
+und sonst immer springt. (Hilfe unter 263)
+#
+Du musst die Methode 'begegnungMit' nochmal umbauen. Finde eine Möglichkeit,
+sodass dein Held alle Hindernisse überwindet. (Hilfe unter 276)
+#
+Super. Du bist erfolgreich durch die Gänge des DUNGEON gelaufen.
+Im dritten Teil erfährst du, was sich hinter der Tür befindet.
+Verwende für deine Heldenklasse in BlueJ auch den Menüpunkt "Bearbeiten > Auto-Layout".
+Zeige dann dein Heft mit den Lösungen wieder vorne am Lehrerpult.
+
+Bonus (FEHLT): Um das große Finale zu erreichen, erwartet dich noch ein ganzes Dungeonlabyrinth.
+###
+Leider hat dein Held keine Ahnung, was er jetzt tun soll. So wird das nichts.
+Schreibe als erstes eine Methode 'kaempfen' (ohne Parameter oder Rückgabewert).
+ -> Bearbeite jetzt Aufgabenblatt Nummer 12. (!)
+Dein Held weiß sogar bereits wie man angreift. Eine passende Methode wurde in 
+der Klasse HELD bereits programmiert. Um diese Methode im Kampf zu benutzen, 
+rufe die passende Methode der Oberklasse in deiner neuen Methode 'kaempfen' auf. 
+(Hilfe unter 309)
+#
+Deine Methode 'kaempfen' ist vorhanden. Jedoch macht sie noch nicht das richtige.
+Schreibe sie so, dass sie die andere Methode zum angreifen aus der Oberklasse
+aufruft. (Hilfe unter 309)
+#
+Und so hat der kleine Gnom deinen Helden besiegt. Das ging schnell. :-(
+Dein Held weiß noch nicht, wann er seine Methode 'kaempfen' verwenden soll.
+Baue also die Methode 'begegnungMit' so um, dass du bei einem *Gegner* zuerst deine neue
+Methode 'kaempfen' aufrufst und als Rückgabe danach 'Attacke!' zurück gibst.
+(Hilfe unter 333)
+#
+Prima! Du musst ab jetzt die Methode 'begegnungMit' nicht mehr ändern!
+Dein Held musste aber auch bisschen was einstecken. Schau mal nach seinen Leben:
+Klicke mit Rechtsklick auf das rote Helden-Objekt, dann auf 'Inspizieren'. 
+Hier solltest du die Attributwerte sehen.
+Füge in der Methode 'kaempfen' nach deinem Angriff noch einen Methodenaufruf 
+von 'heilen' ein, damit es ihm etwas besser geht.
+#
+Beachte, dass dein Held sich nur 1x pro Kampfrunde heilen darf!!!
+Er sollte jetzt eigentlich genau 82 Lebenspunkte haben.
+#
+OHA! Der ist viel krasser! Schau mal nach deinen Lebenspunkten!
+Nach nur wenigen Kampfrunden ist dein Held ohnmächtig zusammengeklappt.
+Du musst schneller angreifen! Schreibe die Methode so um, dass du jedes mal 5x angreifst, 
+indem du einfach mehrere Methodenaufrufe schreibst. 
+Beachte, dass du dich nur einmal heilen darfst.
+#
+WUUMMS! Jova hat deinen Helden mit seiner riesigen Keule zu Pfannkuchenmatsche zerschlagen.
+Irgendwie muss dein Held überirdisch schnell angreifen...
+-> Bearbeite Aufgabenblatt Nummer 13.
+Löse das Problem mit dem Endgegner, indem du pro Kampfrunde mindestens 100 Angriffe machst.`
