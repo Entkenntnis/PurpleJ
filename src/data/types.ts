@@ -1,10 +1,15 @@
+export interface Class {
+  name: string
+  content: string
+  position: { x: number; y: number }
+  size?: { width: number; height: number }
+}
+
+type Output = 'display' | 'terminal'
+
 export interface IUIStore {
-  classes: {
-    name: string
-    content: string
-    position: { x: number; y: number }
-    size?: { width: number; height: number }
-  }[]
+  projectId: number
+  classes: Class[]
   openClasses: string[]
   openClass: string | null
   dirtyClasses: string[]
@@ -12,7 +17,9 @@ export interface IUIStore {
   instances: { name: string; type: string }[]
   inAction: boolean
   page: 'home' | 'ide'
-  output: 'display' | 'terminal'
+  output: Output
+  cheerpjUrl: string
+  controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
 }
 
 export interface Runtime {
@@ -36,12 +43,15 @@ export interface ClassAPI {
   }[]
 }
 
-export interface IVMStore {
-  cheerpjUrl: string
-  controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
-}
-
 export interface InteractiveElement {
   code: string
   action: () => void
+}
+
+export interface Project {
+  title: string
+  description: JSX.Element
+  output: Output
+  classes: Class[]
+  files?: { name: string; content: string }[]
 }

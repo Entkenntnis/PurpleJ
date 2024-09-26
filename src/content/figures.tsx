@@ -1,10 +1,18 @@
-import { IUIStore } from '@/data/types'
+import { Project } from '@/data/types'
 
-export const figures: IUIStore['classes'] = [
-  {
-    name: 'Canvas',
-    position: { x: 50, y: 50 },
-    content: `import javax.swing.*;
+export const figures: Project = {
+  title: 'Figuren (übernommen von BlueJ)',
+  description: (
+    <>
+      <p>In diesem Projekt kannst du verschiedene Formen zeichnen.</p>
+    </>
+  ),
+  output: 'display',
+  classes: [
+    {
+      name: 'Canvas',
+      position: { x: 50, y: 50 },
+      content: `import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -235,11 +243,11 @@ public class Canvas
 
 }
 `,
-  },
-  {
-    name: 'Circle',
-    position: { x: 200, y: 150 },
-    content: `import java.awt.*;
+    },
+    {
+      name: 'Circle',
+      position: { x: 200, y: 150 },
+      content: `import java.awt.*;
 import java.awt.geom.*;
 
 /**
@@ -431,11 +439,11 @@ public class Circle
     }
 }
 `,
-  },
-  {
-    name: 'Square',
-    position: { x: 400, y: 250 },
-    content: `import java.awt.*;
+    },
+    {
+      name: 'Square',
+      position: { x: 400, y: 250 },
+      content: `import java.awt.*;
 
 /**
  * A square that can be manipulated and that draws itself on a canvas.
@@ -627,11 +635,11 @@ public class Square
     }
 }
 `,
-  },
-  {
-    name: 'Triangle',
-    position: { x: 200, y: 350 },
-    content: `import java.awt.*;
+    },
+    {
+      name: 'Triangle',
+      position: { x: 200, y: 350 },
+      content: `import java.awt.*;
 
 /**
  * A triangle that can be manipulated and that draws itself on a canvas.
@@ -827,11 +835,11 @@ public class Triangle
     }
 }
 `,
-  },
-  {
-    name: 'Person',
-    position: { x: 400, y: 450 },
-    content: `import java.awt.*;
+    },
+    {
+      name: 'Person',
+      position: { x: 400, y: 450 },
+      content: `import java.awt.*;
 
 /**
  * A person that can be manipulated and that draws itself on a canvas.
@@ -1038,5 +1046,6 @@ public class Person
     }
 }
 `,
-  },
-]
+    },
+  ],
+}

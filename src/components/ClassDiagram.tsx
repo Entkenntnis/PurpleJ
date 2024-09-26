@@ -9,6 +9,8 @@ import {
 } from '@xyflow/react'
 import clsx from 'clsx'
 import { useCallback, useEffect } from 'react'
+import { FaIcon } from './FaIcon'
+import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons'
 
 const proOptions = { hideAttribution: true }
 
@@ -91,14 +93,21 @@ const SingleClass = ({
         minWidth={100}
         minHeight={50}
       >
-        <ResizeIcon />
+        <FaIcon
+          icon={faUpRightAndDownLeftFromCenter}
+          className="-scale-x-100 absolute right-1 bottom-1"
+        />
       </NodeResizeControl>
-      <div className="h-full">
-        <p className={clsx('border-b text-center pt-1 pb-1 border-black')}>
+      <div className="h-full flex flex-col">
+        <p
+          className={clsx(
+            'border-b text-center pt-1 pb-1 border-black font-bold',
+          )}
+        >
           {data.label}
         </p>
         <div
-          className={clsx('pl-2 pt-1 pb-6 pr-6 h-full')}
+          className={clsx('pl-2 pt-1 pb-6 pr-6 flex-grow')}
           style={
             data.dirty
               ? {
@@ -149,28 +158,5 @@ const SingleClass = ({
         </div>
       </div>
     </>
-  )
-}
-
-function ResizeIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      strokeWidth="2"
-      stroke="#ff0071"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ position: 'absolute', right: 5, bottom: 5 }}
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <polyline points="16 20 20 20 20 16" />
-      <line x1="14" y1="14" x2="20" y2="20" />
-      <polyline points="8 4 4 4 4 8" />
-      <line x1="4" y1="4" x2="10" y2="10" />
-    </svg>
   )
 }

@@ -1,6 +1,5 @@
-import { dungeon } from '@/content/dungeon'
-import { figures } from '@/content/figures'
-import { IUIStore } from '@/data/types'
+import { projects } from '@/content/projects'
+import { Project } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 
 export function Home() {
@@ -31,8 +30,7 @@ export function Home() {
           </p>
           <p className="mt-3">Steige ein mit einem dieser Projekte:</p>
           <ul className="mt-3 list-disc list-inside">
-            {renderLink('Figuren (übernommen von BlueJ)', figures, 'display')}
-            {renderLink('Helden-Abenteuer (WIP)', dungeon, 'terminal')}
+            {Object.entries(projects).map(renderLink)}
           </ul>
           <p className="mt-[200px]">
             Das Projekt wird ermöglicht durch Technologie von{' '}
@@ -55,26 +53,24 @@ export function Home() {
     </>
   )
 
-  function renderLink(
-    name: string,
-    classes: IUIStore['classes'],
-    output: 'terminal' | 'display',
-  ) {
+  function renderLink([id, project]: [string, Project]) {
     return (
       <li
+        key={project.title}
         className="text-purple-600 hover:underline cursor-pointer"
         onClick={() => {
           UIStore.update((s) => {
-            s.classes = classes
-            s.dirtyClasses = classes.map((c) => c.name)
+            s.classes = project.classes
+            s.dirtyClasses = project.classes.map((c) => c.name)
             s.openClass = null
             s.openClasses = []
             s.page = 'ide'
-            s.output = output
+            s.output = project.output
+            s.projectId = parseInt(id)
           })
         }}
       >
-        {name}
+        {project.title}
       </li>
     )
   }

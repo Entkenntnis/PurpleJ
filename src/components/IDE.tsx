@@ -3,9 +3,10 @@ import { Editor } from '@/components/Editor'
 import { Runner } from '@/components/Runner'
 import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
-import { ArrowLeft } from 'lucide-react'
 import { useJavaRuntime } from './JavaRuntime'
 import { ObjectBench } from './ObjectBench'
+import { faCaretLeft } from '@fortawesome/free-solid-svg-icons'
+import { FaIcon } from './FaIcon'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
@@ -28,7 +29,7 @@ export default function IDE() {
                 })
               }}
             >
-              <ArrowLeft className="inline-block w-3" /> zurück
+              <FaIcon icon={faCaretLeft} /> zurück
             </button>
             <button
               className={clsx(
