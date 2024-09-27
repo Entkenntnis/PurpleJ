@@ -5,23 +5,39 @@ import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
 import { useJavaRuntime } from './JavaRuntime'
 import { ObjectBench } from './ObjectBench'
-import { faCaretLeft } from '@fortawesome/free-solid-svg-icons'
+import {
+  faBars,
+  faCaretLeft,
+  faCircle,
+  faFloppyDisk,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons'
 import { FaIcon } from './FaIcon'
+import { useState } from 'react'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
   const openClass = UIStore.useState((s) => s.openClass)
+  const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
   const output = UIStore.useState((s) => s.output)
 
   const runtime = useJavaRuntime()
 
+  const [showMenu, setShowMenu] = useState(false)
+
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline">
-          <div className="flex items-baseline justify-start gap-4 pl-4">
+        <div
+          className={clsx(
+            'absolute top-[44px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-10 pl-3',
+            'transition-all shadow-md',
+            showMenu ? 'left-0' : '-left-[300px]',
+          )}
+        >
+          <p>
             <button
-              className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded"
+              className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded my-3"
               onClick={() => {
                 runtime.getRuntime().exit()
                 UIStore.update((s) => {
@@ -30,6 +46,28 @@ export default function IDE() {
               }}
             >
               <FaIcon icon={faCaretLeft} /> zurück
+            </button>
+          </p>
+          <p>
+            <button
+              className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded my-3"
+              onClick={() => {
+                alert('Dein Fortschritt wurde auf diesem Gerät gespeichert.')
+              }}
+            >
+              <FaIcon icon={faFloppyDisk} /> Speichern
+            </button>
+          </p>
+        </div>
+        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline">
+          <div className="flex items-baseline justify-start gap-4 pl-4">
+            <button
+              className="bg-gray-200 hover:bg-gray-300 px-2 py-0.5 rounded mr-5"
+              onClick={() => {
+                setShowMenu(!showMenu)
+              }}
+            >
+              <FaIcon icon={faBars} /> Menü
             </button>
             <button
               className={clsx(
@@ -63,7 +101,13 @@ export default function IDE() {
                   })
                 }}
               >
-                {name}{' '}
+                {name}
+                {dirtyClasses.includes(name) && (
+                  <FaIcon
+                    icon={faCircle}
+                    className="ml-1 text-[9px] text-black"
+                  />
+                )}
                 <button
                   className="inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500"
                   onClick={(e) => {

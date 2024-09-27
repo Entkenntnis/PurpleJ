@@ -32,7 +32,14 @@ export function Home() {
           <ul className="mt-3 list-disc list-inside">
             {Object.entries(projects).map(renderLink)}
           </ul>
-          <p className="mt-12">Projekt aus Datei laden:</p>
+          <p className="mt-12">Lokaler Zwischenspeicher:</p>
+          <ul className="mt-3">
+            <li>Element 1</li>
+          </ul>
+          <p className="mt-3">
+            <input type="checkbox" /> automatisch lokal speichern
+          </p>
+          <p className="mt-20">Projekt aus Datei laden:</p>
           <p className="my-3">
             <input type="file" className="bg-gray-50 p-2 rounded" />
           </p>
@@ -67,22 +74,23 @@ export function Home() {
 
   function renderLink([id, project]: [string, Project]) {
     return (
-      <li
-        key={project.title}
-        className="text-purple-600 hover:underline cursor-pointer"
-        onClick={() => {
-          UIStore.update((s) => {
-            s.classes = project.classes
-            s.dirtyClasses = project.classes.map((c) => c.name)
-            s.openClass = null
-            s.openClasses = []
-            s.page = 'ide'
-            s.output = project.output
-            s.projectId = parseInt(id)
-          })
-        }}
-      >
-        {project.title}
+      <li key={project.title}>
+        <button
+          className="text-purple-600 hover:underline cursor-pointer"
+          onClick={() => {
+            UIStore.update((s) => {
+              s.classes = project.classes
+              s.dirtyClasses = project.classes.map((c) => c.name)
+              s.openClass = null
+              s.openClasses = []
+              s.page = 'ide'
+              s.output = project.output
+              s.projectId = parseInt(id)
+            })
+          }}
+        >
+          {project.title}
+        </button>
       </li>
     )
   }
