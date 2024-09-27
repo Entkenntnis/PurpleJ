@@ -1,4 +1,4 @@
-import { IUIStore } from '@/data/types'
+import { Class } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 import {
   Background,
@@ -15,11 +15,11 @@ import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icon
 const proOptions = { hideAttribution: true }
 
 export function ClassDiagram() {
-  const classes = UIStore.useState((s) => s.classes)
+  const classes = UIStore.useState((s) => s.project!.classes)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
 
   const classToNode = useCallback(
-    (c: IUIStore['classes'][number], i: number) => {
+    (c: Class, i: number) => {
       return {
         id: i.toString(),
         type: 'SingleClass',
@@ -53,8 +53,9 @@ export function ClassDiagram() {
         for (const event of e) {
           if (event.type == 'position' && !event.dragging) {
             UIStore.update((s) => {
-              s.classes.find((_, i) => i.toString() === event.id)!.position =
-                event.position!
+              s.project!.classes.find(
+                (_, i) => i.toString() === event.id,
+              )!.position = event.position!
             })
           }
         }
@@ -63,6 +64,8 @@ export function ClassDiagram() {
       onEdgesChange={onEdgesChange}
       nodeTypes={{ SingleClass }}
       proOptions={proOptions}
+      minZoom={1}
+      maxZoom={1}
     >
       <Background />
     </ReactFlow>
@@ -82,7 +85,7 @@ const SingleClass = ({
         style={{ background: 'transparent', border: 'none' }}
         onResizeEnd={(e) => {
           UIStore.update((s) => {
-            const c = s.classes.find((_, i) => i.toString() === id)!
+            const c = s.project!.classes.find((_, i) => i.toString() === id)!
             if (!c?.size) {
               c.size = { width: 0, height: 0 }
             }
@@ -142,7 +145,9 @@ const SingleClass = ({
               const result = confirm('Klasse wirklich löschen?')
               if (result) {
                 UIStore.update((s) => {
-                  s.classes = s.classes.filter((el) => el.name !== data.label)
+                  s.project!.classes = s.project!.classes.filter(
+                    (el) => el.name !== data.label,
+                  )
                   s.openClasses = s.openClasses.filter(
                     (el) => el !== data.label,
                   )

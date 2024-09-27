@@ -34,9 +34,9 @@ export function ObjectBench() {
       )}
       {controllerState === 'compile-if-dirty' && (
         <div className="flex justify-center items-center h-full">
-          <p className="pb-4">
+          <p className="pb-2">
             <button
-              className="px-2 py-0.5 bg-purple-300 hover:bg-purple-400 rounded"
+              className="px-3 py-2 bg-purple-400 hover:bg-purple-500 rounded"
               onClick={async () => {
                 runtime.getRuntime().compileAndRun()
               }}

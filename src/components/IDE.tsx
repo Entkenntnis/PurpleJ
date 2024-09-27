@@ -7,18 +7,20 @@ import { useJavaRuntime } from './JavaRuntime'
 import { ObjectBench } from './ObjectBench'
 import {
   faBars,
-  faCaretLeft,
   faCircle,
+  faDownload,
   faFloppyDisk,
+  faTrashCan,
 } from '@fortawesome/free-solid-svg-icons'
 import { FaIcon } from './FaIcon'
 import { useState } from 'react'
+import { saveProject } from '@/actions/save-project'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
   const openClass = UIStore.useState((s) => s.openClass)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
-  const output = UIStore.useState((s) => s.output)
+  const output = UIStore.useState((s) => s.project!.output)
 
   const runtime = useJavaRuntime()
 
@@ -29,39 +31,95 @@ export default function IDE() {
       <div className="h-full flex flex-col">
         <div
           className={clsx(
-            'absolute top-[44px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-10 pl-3',
+            'absolute top-[42px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-10 pl-3',
             'transition-all shadow-md',
             showMenu ? 'left-0' : '-left-[300px]',
           )}
         >
-          <p>
+          <p className="mt-4">
             <button
-              className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded my-3"
+              className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
               onClick={() => {
                 runtime.getRuntime().exit()
+                saveProject()
                 UIStore.update((s) => {
                   s.page = 'home'
                 })
               }}
             >
-              <FaIcon icon={faCaretLeft} /> zurück
+              <FaIcon icon={faFloppyDisk} className="mr-2" /> Projekt speichern
+              und schließen
             </button>
           </p>
-          <p>
+
+          <p className="mt-3">
             <button
-              className="bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded my-3"
+              className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
               onClick={() => {
-                alert('Dein Fortschritt wurde auf diesem Gerät gespeichert.')
+                runtime.getRuntime().exit()
+                saveProject()
+
+                const p = UIStore.getRawState().project!
+                const blob = new Blob([JSON.stringify(p)], {
+                  type: 'text/json',
+                })
+                const link = document.createElement('a')
+
+                link.download = `${new Date().toISOString().substring(0, 10)}-${p?.title.replace(
+                  /[^A-Za-z0-9äüöÄÜÖß]/g,
+                  '_',
+                )}-purplej.json`
+                link.href = window.URL.createObjectURL(blob)
+                link.dataset.downloadurl = [
+                  'text/json',
+                  link.download,
+                  link.href,
+                ].join(':')
+
+                const evt = new MouseEvent('click', {
+                  view: window,
+                  bubbles: true,
+                  cancelable: true,
+                })
+
+                link.dispatchEvent(evt)
+                link.remove()
               }}
             >
-              <FaIcon icon={faFloppyDisk} /> Speichern
+              <FaIcon icon={faDownload} className="mr-2" /> Projekt
+              herunterladen
+            </button>
+          </p>
+
+          <p className="mt-3">
+            <button
+              className="bg-gray-100 hover:bg-red-200 px-3 py-2 rounded my-3"
+              onClick={() => {
+                const result = confirm('Projekt wirklich löschen?')
+                if (result) {
+                  runtime.getRuntime().exit()
+                  localStorage.removeItem(
+                    `purplej_project_${UIStore.getRawState().projectId}`,
+                  )
+                  UIStore.update((s) => {
+                    s.page = 'home'
+                  })
+                }
+              }}
+            >
+              <FaIcon icon={faTrashCan} className="mr-2" /> Projekt löschen
             </button>
           </p>
         </div>
-        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline">
+        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline border-b-2 border-b-purple-300">
           <div className="flex items-baseline justify-start gap-4 pl-4">
             <button
-              className="bg-gray-200 hover:bg-gray-300 px-2 py-0.5 rounded mr-5"
+              className={clsx(
+                ' px-2 py-0.5 rounded mr-5 transition-colors',
+                showMenu
+                  ? 'bg-purple-200 hover:bg-purple-300'
+                  : 'bg-gray-200 hover:bg-gray-300',
+              )}
               onClick={() => {
                 setShowMenu(!showMenu)
               }}
@@ -72,8 +130,8 @@ export default function IDE() {
               className={clsx(
                 'px-2 py-0.5 rounded',
                 openClass === null
-                  ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-400 '
-                  : 'bg-purple-200 hover:bg-purple-300',
+                  ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
+                  : 'bg-purple-100 hover:bg-purple-200',
               )}
               onClick={() => {
                 UIStore.update((s) => {
@@ -89,7 +147,7 @@ export default function IDE() {
                 className={clsx(
                   'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
                   openClass === name
-                    ? 'bg-pink-200 mt-2 pb-2.5 rounded-bl-none rounded-br-none'
+                    ? 'bg-pink-200 mt-2 pb-2 rounded-bl-none rounded-br-none'
                     : 'bg-gray-200 hover:bg-gray-300',
                 )}
                 onClick={() => {
@@ -127,12 +185,12 @@ export default function IDE() {
                 const name = prompt('Welchen Namen soll die Klasse haben?')
                 if (name) {
                   UIStore.update((s) => {
-                    s.classes.push({
+                    s.project!.classes.push({
                       name,
                       content: `public class ${name} {
-  public ${name} () {
-      
-  }
+    public ${name} () {
+        
+    }
 }`,
                       position: {
                         x: Math.random() * 300,
@@ -153,7 +211,7 @@ export default function IDE() {
               value={output}
               onChange={(e) => {
                 UIStore.update((s) => {
-                  s.output = e.target.value as 'terminal' | 'display'
+                  s.project!.output = e.target.value as 'terminal' | 'display'
                 })
               }}
             >

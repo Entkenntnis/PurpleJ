@@ -1,4 +1,4 @@
-import { projects } from '@/content/projects'
+import { saveProject } from '@/actions/save-project'
 import { ClassAPI, InteractiveElement, Runtime } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 import Script from 'next/script'
@@ -22,6 +22,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     exit() {},
     lib: {},
     heap: {},
+    standardLib: {},
   })
 
   const cheerpjUrl = UIStore.useState((s) => s.cheerpjUrl)
@@ -81,10 +82,6 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       },
       natives: {
         async Java_SyntheticMain_entry(lib: object) {
-          /*console.log('Hi!')
-        console.log(lib)*/
-          //const circle = await lib.Circle.getInstance()
-          //await circle.makeVisible()
           // @ts-expect-error Expose to client
           window.lib = lib
           runtime.current.lib = lib
@@ -101,12 +98,14 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         },
       },
     })
-    // cheerpjCreateDisplay(-1, -1, displayRef.current)
+
     await cheerpjRunMain(
       'com.sun.tools.javac.Main',
       '/app/tools.jar',
       '-version',
     )
+    runtime.current.standardLib = await cheerpjRunLibrary('')
+
     UIStore.update((s) => {
       s.controllerState = 'compile-if-dirty'
       // s.dirtyClasses = s.classes.map((c) => c.name)
@@ -114,11 +113,15 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
   }
 
   async function compileAndRun() {
+    saveProject()
     const ui = UIStore.getRawState()
+
+    const d = `/files/${ui.projectId}/`
+
     if (ui.dirtyClasses.length > 0) {
       // This is the compile step
       const encoder = new TextEncoder()
-      const sourceFiles = ['/str/SyntheticMain.java']
+      const sourceFiles = [`/str/${ui.projectId}/SyntheticMain.java`]
 
       cheerpOSAddStringFile(
         sourceFiles[0],
@@ -133,18 +136,33 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           }`),
       )
 
-      const project = projects[ui.projectId]
-      if (project.files) {
-        project.files.forEach((file) => {
-          cheerpOSAddStringFile(file.name, encoder.encode(file.content))
-        })
+      const File = await runtime.current.standardLib.java.io.File
+      const f = await new File(d)
+      await f.mkdir()
+
+      if (ui.project && ui.project.files) {
+        const Files = await runtime.current.standardLib.java.nio.file.Files
+        const StandardCopyOption =
+          await runtime.current.standardLib.java.nio.file.StandardCopyOption
+        for (const file of ui.project.files) {
+          const src = `/str/${ui.projectId}/` + file.name
+          cheerpOSAddStringFile(src, encoder.encode(file.content))
+          const p1 = await (await new File(src)).toPath()
+          const f2 = await new File('/files/' + file.name)
+          const parent = await f2.getParentFile()
+          await parent.mkdirs()
+          const p2 = await f2.toPath()
+          await Files.copy(p1, p2, [StandardCopyOption.REPLACE_EXISTING])
+        }
       }
 
       for (const c of ui.dirtyClasses) {
-        const filename = `/str/${c}.java`
+        const filename = `/str/${ui.projectId}/${c}.java`
         cheerpOSAddStringFile(
           filename,
-          encoder.encode(ui.classes.find((el) => el.name == c)!.content),
+          encoder.encode(
+            ui.project!.classes.find((el) => el.name == c)!.content,
+          ),
         )
         sourceFiles.push(filename)
       }
@@ -155,11 +173,11 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       document.getElementById('console')!.innerHTML = ''
       const code = await cheerpjRunMain(
         'com.sun.tools.javac.Main',
-        '/app/tools.jar:/files/',
+        '/app/tools.jar:/files/:' + d,
         ...sourceFiles,
         '-d',
-        '/files/',
-        '-Xlint:-serial,unchecked',
+        d,
+        '-Xlint:-serial,-unchecked',
       )
       if (code !== 0) {
         UIStore.update((s) => {
@@ -185,7 +203,8 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
     runtime.current.heap = {}
     prepareInteractiveMode()
-    await cheerpjRunMain('SyntheticMain', '/files/')
+    await cheerpjRunMain('SyntheticMain', d)
+    // console.log('result', r)
     UIStore.update((s) => {
       s.controllerState = 'compile-if-dirty'
     })
@@ -193,7 +212,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
   function prepareInteractiveMode() {
     const ui = UIStore.getRawState()
-    Object.values(ui.classes).forEach((c) => {
+    Object.values(ui.project!.classes).forEach((c) => {
       const javaClassString = c.content
       const classAPI: ClassAPI = {
         hasPublicConstructor: false,

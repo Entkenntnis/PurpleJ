@@ -1,8 +1,30 @@
 import { projects } from '@/content/projects'
 import { Project } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
+import { useEffect, useState } from 'react'
+import { FaIcon } from './FaIcon'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+
+// Um lokale Projekte zu identifizieren, kann ich mich nicht auf die Titel verlassen.
+// Stattdessen nutze ich eine ID
+
+// Jetzt kann ich auf der Startseite die verfügbaren lokalen Projekte anzeigen und parsen
 
 export function Home() {
+  const [local, setLocal] = useState<[string, Project][] | null>(null)
+
+  useEffect(() => {
+    const keys = Object.keys(localStorage).filter((key) =>
+      key.startsWith('purplej_project_'),
+    )
+    const locals: [string, Project][] = keys.map((key) => {
+      return [key.split('_')[2], JSON.parse(localStorage.getItem(key)!)]
+    })
+    locals.sort((a, b) => b[1].lastUpdated - a[1].lastUpdated)
+
+    setLocal(locals)
+  }, [])
+
   return (
     <>
       <div>
@@ -14,30 +36,30 @@ export function Home() {
         <div className="max-w-[600px] p-3 mx-auto mt-9">
           <p>
             Entdecke die objekt-orientiere Programmierung mit Java anhand
-            anschaulicher Projekte. Starte mit einem Beispiel:
+            anschaulicher Projekte. Wähle ein Beispiel:
           </p>
           <ul className="mt-3 list-disc list-inside">
-            {Object.entries(projects).map(renderLink)}
+            {Object.values(projects).map((p) =>
+              renderLink(p, Math.random().toString().substring(2)),
+            )}
           </ul>
-          <p className="mt-12">Lokaler Zwischenspeicher:</p>
-          <ul className="mt-3">
-            <li>Element 1</li>
-          </ul>
-          <p className="mt-3">
-            <input type="checkbox" /> automatisch lokal speichern
-          </p>
-          <p className="mt-20">Projekt aus Datei laden:</p>
-          <p className="my-3">
-            <input type="file" className="bg-gray-50 p-2 rounded" />
-          </p>
-          <p>
-            <button className="px-2 py-0.5 bg-purple-200 hover:bg-purple-300 rounded">
-              Öffnen
-            </button>{' '}
-            <button className="ml-10 px-2 py-0.5 bg-pink-200 hover:bg-pink-300 rounded">
-              Im Editor bearbeiten
-            </button>
-          </p>
+          {local == null ? (
+            <p className="mt-12">
+              <FaIcon
+                icon={faSpinner}
+                className="w-5 h-5 animate-spin text-purple-700 "
+              />
+            </p>
+          ) : (
+            local.length > 0 && (
+              <>
+                <p className="mt-12">Dein Workspace:</p>
+                <ul className="mt-3 list-disc list-inside">
+                  {local.map(([key, p]) => renderLink(p, key, true))}
+                </ul>
+              </>
+            )
+          )}
           <p className="mt-[200px]">
             Das Projekt wird ermöglicht durch Technologie von{' '}
             <a
@@ -59,24 +81,24 @@ export function Home() {
     </>
   )
 
-  function renderLink([id, project]: [string, Project]) {
+  function renderLink(project: Project, id: string, showTs: boolean = false) {
     return (
       <li key={project.title}>
         <button
           className="text-purple-600 hover:underline cursor-pointer"
           onClick={() => {
             UIStore.update((s) => {
-              s.classes = project.classes
               s.dirtyClasses = project.classes.map((c) => c.name)
               s.openClass = null
               s.openClasses = []
               s.page = 'ide'
-              s.output = project.output
-              s.projectId = parseInt(id)
+              s.projectId = id
+              s.project = project
             })
           }}
         >
           {project.title}
+          {showTs && <> [{new Date(project.lastUpdated).toLocaleString()}]</>}
         </button>
       </li>
     )

@@ -2,7 +2,8 @@ import { Project } from '@/data/types'
 
 export const dungeon: Project = {
   title: 'Helden-Abenteuer (WIP)',
-  description: <></>,
+  description: '',
+  lastUpdated: 1727461682352,
   output: 'terminal',
   classes: [
     {
@@ -318,14 +319,14 @@ class DUNGEON{
 
     private void texteLesen(){
         try{
-            Scanner s = new Scanner(new File("/str/Data/Anleitungstexte.txt"));
+            Scanner s = new Scanner(new File("Data/Anleitungstexte.txt"));
             String t = s.useDelimiter("\\\\A").next();
             String[] kapitel = t.split("\\n###\\n");
             texte = new String[kapitel.length][];
             for (int i = 0; i < kapitel.length; i++){
                 texte[i] = kapitel[i].split("\\n#\\n");
             }
-            s = new Scanner(new File("/str/Data/Hilfen.txt"));
+            s = new Scanner(new File("Data/Hilfen.txt"));
             t = s.useDelimiter("\\\\A").next();
             hilfen = t.split("#");
         }catch(java.io.FileNotFoundException e){
@@ -579,7 +580,7 @@ class DUNGEON{
   ],
   files: [
     {
-      name: '/str/Data/Hilfen.txt',
+      name: 'Data/Hilfen.txt',
       content: `Erstelle zuerst eine neue Klasse und gib als Namen eine von dir gewählte
 Heldenkategorie in Großbuchstaben an (z.B: ZWERG, DIEB, ...)
 Wähle dann mit Rechtsklick Bearbeiten aus und lösche den gesamten Inhalt.
@@ -648,7 +649,7 @@ Für begegnungMit kannst du folgende Idee verwenden:
   ende wenn`,
     },
     {
-      name: '/str/Data/Anleitungstexte.txt',
+      name: 'Data/Anleitungstexte.txt',
       content: `Willkommen in der Heldenvorbereitung. Hier steht immer, was du tun musst.
 Als erstes wirst du einen eigenen Helden erschaffen.
 Verwende die Hilfe, um dafür eine neue Unterklasse von HELD (z.B: KRIEGER, ZAUBERER, ...) 

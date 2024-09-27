@@ -1,12 +1,9 @@
 import { Project } from '@/data/types'
 
 export const figures: Project = {
-  title: 'Figuren (übernommen von BlueJ)',
-  description: (
-    <>
-      <p>In diesem Projekt kannst du verschiedene Formen zeichnen.</p>
-    </>
-  ),
+  title: 'Figuren',
+  description: 'In diesem Projekt kannst du verschiedene Formen zeichnen.',
+  lastUpdated: 1727461682352,
   output: 'display',
   classes: [
     {

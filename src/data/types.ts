@@ -8,8 +8,8 @@ export interface Class {
 type Output = 'display' | 'terminal'
 
 export interface IUIStore {
-  projectId: number
-  classes: Class[]
+  projectId: string
+  project: Project | null
   openClasses: string[]
   openClass: string | null
   dirtyClasses: string[]
@@ -17,7 +17,6 @@ export interface IUIStore {
   instances: { name: string; type: string }[]
   inAction: boolean
   page: 'home' | 'ide'
-  output: Output
   cheerpjUrl: string
   controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
 }
@@ -31,6 +30,8 @@ export interface Runtime {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   heap: { [key: string]: any }
   displayElement: HTMLDivElement | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  standardLib: any
 }
 
 export interface ClassAPI {
@@ -50,8 +51,9 @@ export interface InteractiveElement {
 
 export interface Project {
   title: string
-  description: JSX.Element
+  description: string
   output: Output
   classes: Class[]
   files?: { name: string; content: string }[]
+  lastUpdated: number
 }

@@ -10,7 +10,7 @@ import { EditorState } from '@codemirror/state'
 export function Editor() {
   const editorDiv = useRef(null)
   const openClass = UIStore.useState((s) => s.openClass)
-  const classes = UIStore.useState((s) => s.classes)
+  const classes = UIStore.useState((s) => s.project!.classes)
 
   useEffect(() => {
     if (editorDiv.current) {
@@ -25,7 +25,7 @@ export function Editor() {
             EditorView.updateListener.of((e) => {
               if (e.docChanged) {
                 UIStore.update((s) => {
-                  s.classes.find((c) => c.name == openClass)!.content =
+                  s.project!.classes.find((c) => c.name == openClass)!.content =
                     editor.state.doc.toString()
                   if (!s.dirtyClasses.includes(openClass!)) {
                     s.dirtyClasses.push(openClass!)
