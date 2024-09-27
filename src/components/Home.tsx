@@ -13,22 +13,9 @@ export function Home() {
         </div>
         <div className="max-w-[600px] p-3 mx-auto mt-9">
           <p>
-            Irgendwann wird dein Programm länger, passt nicht mehr ganz auf den
-            Bildschirm. Du brauchst eine Struktur, um dich nicht zu verlieren.
+            Entdecke die objekt-orientiere Programmierung mit Java anhand
+            anschaulicher Projekte. Starte mit einem Beispiel:
           </p>
-          <p className="mt-3">
-            Die objekt-orientierte Programmierung (OOP) bietet dir eine Lösung.
-            Sie ist nicht perfekt, oh nein, aber ihre Grundideen geben dir einen
-            guten Rahmen.
-          </p>
-          <p className="mt-3">
-            Du findest hier eine Einführung in die OOP mit der Sprache Java.
-            Diese Sprache wurde ausgewählt, weil sie am klarsten die
-            Objektoriertierung umsetzt. Wenn du die Prinzipien in Java
-            verstanden hast, lassen sich diese leicht auf andere Sprachen wie
-            Python oder C++ übertragen.
-          </p>
-          <p className="mt-3">Beispielprojekte:</p>
           <ul className="mt-3 list-disc list-inside">
             {Object.entries(projects).map(renderLink)}
           </ul>

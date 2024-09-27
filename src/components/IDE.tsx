@@ -10,7 +10,6 @@ import {
   faCaretLeft,
   faCircle,
   faFloppyDisk,
-  faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 import { FaIcon } from './FaIcon'
 import { useState } from 'react'
