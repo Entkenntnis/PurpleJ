@@ -5,11 +5,6 @@ import { useEffect, useState } from 'react'
 import { FaIcon } from './FaIcon'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
-// Um lokale Projekte zu identifizieren, kann ich mich nicht auf die Titel verlassen.
-// Stattdessen nutze ich eine ID
-
-// Jetzt kann ich auf der Startseite die verfügbaren lokalen Projekte anzeigen und parsen
-
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
 
@@ -53,7 +48,7 @@ export function Home() {
           ) : (
             local.length > 0 && (
               <>
-                <p className="mt-12">Dein Workspace:</p>
+                <p className="mt-12">Deine Projekte:</p>
                 <ul className="mt-3 list-disc list-inside">
                   {local.map(([key, p]) => renderLink(p, key, true))}
                 </ul>

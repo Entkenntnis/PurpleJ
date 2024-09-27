@@ -32,84 +32,96 @@ export default function IDE() {
         <div
           className={clsx(
             'absolute top-[42px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-10 pl-3',
-            'transition-all shadow-md',
+            'transition-all shadow-md flex justify-between flex-col',
             showMenu ? 'left-0' : '-left-[300px]',
           )}
         >
-          <p className="mt-4">
-            <button
-              className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
-              onClick={() => {
-                runtime.getRuntime().exit()
-                saveProject()
-                UIStore.update((s) => {
-                  s.page = 'home'
-                })
-              }}
-            >
-              <FaIcon icon={faFloppyDisk} className="mr-2" /> Projekt speichern
-              und schließen
-            </button>
-          </p>
-
-          <p className="mt-3">
-            <button
-              className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
-              onClick={() => {
-                runtime.getRuntime().exit()
-                saveProject()
-
-                const p = UIStore.getRawState().project!
-                const blob = new Blob([JSON.stringify(p)], {
-                  type: 'text/json',
-                })
-                const link = document.createElement('a')
-
-                link.download = `${new Date().toISOString().substring(0, 10)}-${p?.title.replace(
-                  /[^A-Za-z0-9äüöÄÜÖß]/g,
-                  '_',
-                )}-purplej.json`
-                link.href = window.URL.createObjectURL(blob)
-                link.dataset.downloadurl = [
-                  'text/json',
-                  link.download,
-                  link.href,
-                ].join(':')
-
-                const evt = new MouseEvent('click', {
-                  view: window,
-                  bubbles: true,
-                  cancelable: true,
-                })
-
-                link.dispatchEvent(evt)
-                link.remove()
-              }}
-            >
-              <FaIcon icon={faDownload} className="mr-2" /> Projekt
-              herunterladen
-            </button>
-          </p>
-
-          <p className="mt-3">
-            <button
-              className="bg-gray-100 hover:bg-red-200 px-3 py-2 rounded my-3"
-              onClick={() => {
-                const result = confirm('Projekt wirklich löschen?')
-                if (result) {
+          <div>
+            <p className="mt-4">
+              <button
+                className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
+                onClick={() => {
                   runtime.getRuntime().exit()
-                  localStorage.removeItem(
-                    `purplej_project_${UIStore.getRawState().projectId}`,
-                  )
+                  saveProject()
                   UIStore.update((s) => {
                     s.page = 'home'
                   })
-                }
-              }}
-            >
-              <FaIcon icon={faTrashCan} className="mr-2" /> Projekt löschen
-            </button>
-          </p>
+                }}
+              >
+                <FaIcon icon={faFloppyDisk} className="mr-2" /> Projekt
+                speichern und schließen
+              </button>
+            </p>
+
+            <p className="mt-3">
+              <button
+                className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
+                onClick={() => {
+                  runtime.getRuntime().exit()
+                  saveProject()
+
+                  const p = UIStore.getRawState().project!
+                  const blob = new Blob([JSON.stringify(p)], {
+                    type: 'text/json',
+                  })
+                  const link = document.createElement('a')
+
+                  link.download = `${new Date().toISOString().substring(0, 10)}-${p?.title.replace(
+                    /[^A-Za-z0-9äüöÄÜÖß]/g,
+                    '_',
+                  )}-purplej.json`
+                  link.href = window.URL.createObjectURL(blob)
+                  link.dataset.downloadurl = [
+                    'text/json',
+                    link.download,
+                    link.href,
+                  ].join(':')
+
+                  const evt = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                  })
+
+                  link.dispatchEvent(evt)
+                  link.remove()
+                }}
+              >
+                <FaIcon icon={faDownload} className="mr-2" /> Projekt
+                herunterladen
+              </button>
+            </p>
+
+            <p className="mt-3">
+              <button
+                className="bg-gray-100 hover:bg-red-200 px-3 py-2 rounded my-3"
+                onClick={() => {
+                  const result = confirm('Projekt wirklich löschen?')
+                  if (result) {
+                    runtime.getRuntime().exit()
+                    localStorage.removeItem(
+                      `purplej_project_${UIStore.getRawState().projectId}`,
+                    )
+                    UIStore.update((s) => {
+                      s.page = 'home'
+                    })
+                  }
+                }}
+              >
+                <FaIcon icon={faTrashCan} className="mr-2" /> Projekt löschen
+              </button>
+            </p>
+            <p className="mt-3 border-t border-2 mr-3"></p>
+            <p>Dateien verwalten (TODO)</p>
+            <p>Interaktionen verwalten (TODO)</p>
+            <p>Zwischenversion speichern</p>
+          </div>
+          <div>
+            <p className="mb-2 text-gray-600">
+              <button className="hover:underline hover:black">Impressum</button>{' '}
+              | powered by CheerpJ
+            </p>
+          </div>
         </div>
         <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline border-b-2 border-b-purple-300">
           <div className="flex items-baseline justify-start gap-4 pl-4">
