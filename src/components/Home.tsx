@@ -28,10 +28,22 @@ export function Home() {
             verstanden hast, lassen sich diese leicht auf andere Sprachen wie
             Python oder C++ übertragen.
           </p>
-          <p className="mt-3">Steige ein mit einem dieser Projekte:</p>
+          <p className="mt-3">Beispielprojekte:</p>
           <ul className="mt-3 list-disc list-inside">
             {Object.entries(projects).map(renderLink)}
           </ul>
+          <p className="mt-12">Projekt aus Datei laden:</p>
+          <p className="my-3">
+            <input type="file" className="bg-gray-50 p-2 rounded" />
+          </p>
+          <p>
+            <button className="px-2 py-0.5 bg-purple-200 hover:bg-purple-300 rounded">
+              Öffnen
+            </button>{' '}
+            <button className="ml-10 px-2 py-0.5 bg-pink-200 hover:bg-pink-300 rounded">
+              Im Editor bearbeiten
+            </button>
+          </p>
           <p className="mt-[200px]">
             Das Projekt wird ermöglicht durch Technologie von{' '}
             <a
