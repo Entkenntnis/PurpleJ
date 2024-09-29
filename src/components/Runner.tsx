@@ -87,9 +87,9 @@ export function Runner() {
             </button>
           </div>
           <div className="overflow-auto p-2 relative">
-            <div className="absolute right-3 top-3">
+            <div className="absolute right-2 top-2">
               <button
-                className="bg-gray-100 hover:bg-gray-200 w-9 h-9 rounded"
+                className="bg-gray-100 hover:bg-gray-200 w-7 h-7 rounded"
                 onClick={() => {
                   UIStore.update((s) => {
                     s.showEditMetaTab = true
