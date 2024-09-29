@@ -15,4 +15,6 @@ export const UIStore = new Store<IUIStore>({
   projectId: '',
   showEditMetaTab: false,
   editMeta: false,
+  showResourcesTab: false,
+  editResources: false,
 })

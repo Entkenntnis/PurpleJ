@@ -16,6 +16,7 @@ import { FaIcon } from './FaIcon'
 import { useState } from 'react'
 import { saveProject } from '@/actions/save-project'
 import { MetaEditor } from './MetaEditor'
+import { Resources } from './Resources'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
@@ -24,6 +25,9 @@ export default function IDE() {
   const output = UIStore.useState((s) => s.project!.output)
   const showEditMetaTab = UIStore.useState((s) => s.showEditMetaTab)
   const editMeta = UIStore.useState((s) => s.editMeta)
+  const showResourcesTab = UIStore.useState((s) => s.showResourcesTab)
+  const editResources = UIStore.useState((s) => s.editResources)
+  const files = UIStore.useState((s) => s.project!.files)
 
   const runtime = useJavaRuntime()
 
@@ -115,9 +119,23 @@ export default function IDE() {
               </button>
             </p>
             <p className="mt-3 border-t border-2 mr-3"></p>
-            <p>Dateien verwalten (TODO)</p>
-            <p>Interaktionen verwalten (TODO)</p>
-            <p>Zwischenversion speichern</p>
+            <p>
+              <button
+                className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded my-3"
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.showResourcesTab = true
+                    s.editResources = true
+                    s.openClass = null
+                    s.editMeta = false
+                  })
+                  setShowMenu(false)
+                }}
+              >
+                Dateien verwalten
+                {files && files.length > 0 && <> ({files.length})</>}
+              </button>
+            </p>
           </div>
           <div>
             <p className="mb-2 text-gray-600">
@@ -144,7 +162,7 @@ export default function IDE() {
             <button
               className={clsx(
                 'px-2 py-0.5 rounded',
-                openClass === null && !editMeta
+                openClass === null && !editMeta && !editResources
                   ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
                   : 'bg-purple-100 hover:bg-purple-200',
               )}
@@ -152,6 +170,7 @@ export default function IDE() {
                 UIStore.update((s) => {
                   s.openClass = null
                   s.editMeta = false
+                  s.editResources = false
                 })
               }}
             >
@@ -189,6 +208,39 @@ export default function IDE() {
                 </button>
               </div>
             )}
+            {showResourcesTab && (
+              <div
+                className={clsx(
+                  'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
+                  editResources
+                    ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
+                    : 'bg-purple-100 hover:bg-purple-200',
+                )}
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.openClass = null
+                    s.editMeta = false
+                    s.editResources = true
+                  })
+                }}
+              >
+                Dateien
+                <button
+                  className="inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500"
+                  onClick={(e) => {
+                    UIStore.update((s) => {
+                      s.editResources = false
+                      s.showResourcesTab = false
+                      s.openClass = null
+                    })
+                    e.stopPropagation()
+                    e.preventDefault()
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
             {openClasses.map((name) => (
               <div
                 key={name}
@@ -204,6 +256,7 @@ export default function IDE() {
                       s.openClass = name
                     }
                     s.editMeta = false
+                    s.editResources = false
                   })
                 }}
               >
@@ -273,7 +326,9 @@ export default function IDE() {
           <div className="w-[calc(100%-500px)] h-full border-r-2 border-purple-300">
             <div className="flex flex-col h-full">
               <div className="h-[calc(100%-120px)]">
-                {editMeta ? (
+                {editResources ? (
+                  <Resources />
+                ) : editMeta ? (
                   <MetaEditor />
                 ) : openClass == null ? (
                   <ClassDiagram />

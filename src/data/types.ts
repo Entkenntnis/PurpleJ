@@ -21,6 +21,8 @@ export interface IUIStore {
   controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
   showEditMetaTab: boolean
   editMeta: boolean
+  showResourcesTab: boolean
+  editResources: boolean
 }
 
 export interface Runtime {
