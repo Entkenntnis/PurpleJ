@@ -15,12 +15,15 @@ import {
 import { FaIcon } from './FaIcon'
 import { useState } from 'react'
 import { saveProject } from '@/actions/save-project'
+import { MetaEditor } from './MetaEditor'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
   const openClass = UIStore.useState((s) => s.openClass)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
   const output = UIStore.useState((s) => s.project!.output)
+  const showEditMetaTab = UIStore.useState((s) => s.showEditMetaTab)
+  const editMeta = UIStore.useState((s) => s.editMeta)
 
   const runtime = useJavaRuntime()
 
@@ -141,18 +144,51 @@ export default function IDE() {
             <button
               className={clsx(
                 'px-2 py-0.5 rounded',
-                openClass === null
+                openClass === null && !editMeta
                   ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
                   : 'bg-purple-100 hover:bg-purple-200',
               )}
               onClick={() => {
                 UIStore.update((s) => {
                   s.openClass = null
+                  s.editMeta = false
                 })
               }}
             >
               Klassenübersicht
             </button>
+            {showEditMetaTab && (
+              <div
+                className={clsx(
+                  'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
+                  editMeta
+                    ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
+                    : 'bg-purple-100 hover:bg-purple-200',
+                )}
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.openClass = null
+                    s.editMeta = true
+                  })
+                }}
+              >
+                Beschreibung
+                <button
+                  className="inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500"
+                  onClick={(e) => {
+                    UIStore.update((s) => {
+                      s.editMeta = false
+                      s.showEditMetaTab = false
+                      s.openClass = null
+                    })
+                    e.stopPropagation()
+                    e.preventDefault()
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
             {openClasses.map((name) => (
               <div
                 key={name}
@@ -167,6 +203,7 @@ export default function IDE() {
                     if (s.openClasses.includes(name)) {
                       s.openClass = name
                     }
+                    s.editMeta = false
                   })
                 }}
               >
@@ -236,7 +273,13 @@ export default function IDE() {
           <div className="w-[calc(100%-500px)] h-full border-r-2 border-purple-300">
             <div className="flex flex-col h-full">
               <div className="h-[calc(100%-120px)]">
-                {openClass == null ? <ClassDiagram /> : <Editor />}
+                {editMeta ? (
+                  <MetaEditor />
+                ) : openClass == null ? (
+                  <ClassDiagram />
+                ) : (
+                  <Editor />
+                )}
               </div>
               <div className="h-[120px] border-t-2 border-purple-300">
                 <ObjectBench />

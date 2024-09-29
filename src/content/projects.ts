@@ -1,8 +1,7 @@
 import { Project } from '@/data/types'
-import { figures } from './figures'
-import { dungeon } from './dungeon'
 
-export const projects: { [key: string]: Project } = {
-  1: figures,
-  2: dungeon,
-}
+import figuren from '../../content/figuren.json'
+import dungeon from '../../content/dungeon.json'
+import empty from '../../content/leer.json'
+
+export const projects: Project[] = [figuren, dungeon, empty] as Project[]

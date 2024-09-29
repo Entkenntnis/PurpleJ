@@ -2,8 +2,8 @@ import { UIStore } from '@/store/UIStore'
 import { useJavaRuntime } from './JavaRuntime'
 import clsx from 'clsx'
 import { FaIcon } from './FaIcon'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons/faSpinner'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
+import { Spinner } from './Spinner'
 
 export function ObjectBench() {
   const controllerState = UIStore.useState((s) => s.controllerState)
@@ -24,10 +24,7 @@ export function ObjectBench() {
       {controllerState === 'compiling' && (
         <div className="flex justify-center items-center h-full">
           <p className="text-purple-600 pb-6">
-            <FaIcon
-              icon={faSpinner}
-              className="w-5 h-5 animate-spin text-purple-700 mr-3"
-            />
+            <Spinner />
             Klassen werden kompiliert ... einen kleinen Moment Geduld 🙏
           </p>
         </div>

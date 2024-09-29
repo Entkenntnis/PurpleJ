@@ -13,4 +13,6 @@ export const UIStore = new Store<IUIStore>({
   cheerpjUrl: '',
   project: null,
   projectId: '',
+  showEditMetaTab: false,
+  editMeta: false,
 })

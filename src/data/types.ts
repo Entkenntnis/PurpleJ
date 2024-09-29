@@ -19,6 +19,8 @@ export interface IUIStore {
   page: 'home' | 'ide'
   cheerpjUrl: string
   controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
+  showEditMetaTab: boolean
+  editMeta: boolean
 }
 
 export interface Runtime {
@@ -51,6 +53,7 @@ export interface InteractiveElement {
 
 export interface Project {
   title: string
+  summary: string
   description: string
   output: Output
   classes: Class[]

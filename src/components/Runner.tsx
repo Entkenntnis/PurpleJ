@@ -2,6 +2,9 @@ import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { useJavaRuntime } from './JavaRuntime'
+import Markdown from 'react-markdown'
+import { FaIcon } from './FaIcon'
+import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
 export function Runner() {
   const displayRef = useRef<HTMLDivElement>(null)
@@ -83,11 +86,24 @@ export function Runner() {
               Challenges (0/4)
             </button>
           </div>
-          <div className="overflow-auto p-2">
+          <div className="overflow-auto p-2 relative">
+            <div className="absolute right-3 top-3">
+              <button
+                className="bg-gray-100 hover:bg-gray-200 w-9 h-9 rounded"
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.showEditMetaTab = true
+                    s.editMeta = true
+                  })
+                }}
+              >
+                <FaIcon icon={faPencil} />
+              </button>
+            </div>
             {tab == 0 && (
-              <div className="prose mt-3">
-                <h2>{project.title}</h2>
-                {project.description}
+              <div className="prose mt-3 prose-p:text-gray-900 prose-li:text-gray-900">
+                <h2 className="mr-10">{project.title}</h2>
+                <Markdown>{project!.description}</Markdown>
               </div>
             )}
           </div>

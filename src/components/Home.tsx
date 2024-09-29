@@ -1,9 +1,8 @@
 import { projects } from '@/content/projects'
 import { Project } from '@/data/types'
-import { UIStore } from '@/store/UIStore'
 import { useEffect, useState } from 'react'
-import { FaIcon } from './FaIcon'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { Spinner } from './Spinner'
+import { loadProject } from '@/actions/load-project'
 
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
@@ -31,26 +30,33 @@ export function Home() {
         <div className="max-w-[600px] p-3 mx-auto mt-9">
           <p>
             Entdecke die objekt-orientiere Programmierung mit Java anhand
-            anschaulicher Projekte. Wähle ein Beispiel:
+            anschaulicher Projekte. Wähle eine Vorlage:
           </p>
-          <ul className="mt-3 list-disc list-inside">
-            {Object.values(projects).map((p) =>
-              renderLink(p, Math.random().toString().substring(2)),
-            )}
-          </ul>
+          <div className="bg-purple-100 rounded-lg px-3 py-0.5 mt-6">
+            {projects.map((p, i) => (
+              <div
+                key={i}
+                className="my-4 bg-white py-2 px-3 rounded hover:bg-gray-100 cursor-pointer"
+                tabIndex={0}
+                onClick={() => {
+                  loadProject(p)
+                }}
+              >
+                <h2 className="font-bold">{p.title}</h2>
+                <p className="mt-2 text-sm text-gray-700">{p.summary}</p>
+              </div>
+            ))}
+          </div>
           {local == null ? (
             <p className="mt-12">
-              <FaIcon
-                icon={faSpinner}
-                className="w-5 h-5 animate-spin text-purple-700 "
-              />
+              <Spinner />
             </p>
           ) : (
             local.length > 0 && (
               <>
                 <p className="mt-12">Deine Projekte:</p>
                 <ul className="mt-3 list-disc list-inside">
-                  {local.map(([key, p]) => renderLink(p, key, true))}
+                  {local.map(([key, p]) => renderLink(p, key))}
                 </ul>
               </>
             )
@@ -76,24 +82,16 @@ export function Home() {
     </>
   )
 
-  function renderLink(project: Project, id: string, showTs: boolean = false) {
+  function renderLink(project: Project, id: string) {
     return (
       <li key={project.title}>
         <button
           className="text-purple-600 hover:underline cursor-pointer"
           onClick={() => {
-            UIStore.update((s) => {
-              s.dirtyClasses = project.classes.map((c) => c.name)
-              s.openClass = null
-              s.openClasses = []
-              s.page = 'ide'
-              s.projectId = id
-              s.project = project
-            })
+            loadProject(project, id)
           }}
         >
-          {project.title}
-          {showTs && <> [{new Date(project.lastUpdated).toLocaleString()}]</>}
+          {project.title}[{new Date(project.lastUpdated).toLocaleString()}]
         </button>
       </li>
     )
