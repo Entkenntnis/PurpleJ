@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import './globals.css'
 import '@xyflow/react/dist/style.css'
+import 'react-reflex/styles.css'
 
 export const metadata: Metadata = {
   title: 'PurpleJ',

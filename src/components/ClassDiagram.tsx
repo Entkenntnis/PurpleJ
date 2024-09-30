@@ -2,7 +2,10 @@ import { Class } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 import {
   Background,
-  NodeResizeControl,
+  Edge,
+  Handle,
+  MarkerType,
+  Position,
   ReactFlow,
   useEdgesState,
   useNodesState,
@@ -10,7 +13,7 @@ import {
 import clsx from 'clsx'
 import { useCallback, useEffect } from 'react'
 import { FaIcon } from './FaIcon'
-import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons'
+import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 const proOptions = { hideAttribution: true }
 
@@ -19,9 +22,9 @@ export function ClassDiagram() {
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
 
   const classToNode = useCallback(
-    (c: Class, i: number) => {
+    (c: Class) => {
       return {
-        id: i.toString(),
+        id: c.name,
         type: 'SingleClass',
         data: { label: c.name, dirty: dirtyClasses.includes(c.name) },
         position: { x: c.position.x, y: c.position.y },
@@ -39,11 +42,31 @@ export function ClassDiagram() {
   const [nodes, setNodes, onNodesChange] = useNodesState(
     classes.map(classToNode),
   )
-  const [edges, , onEdgesChange] = useEdgesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
   useEffect(() => {
     setNodes(classes.map(classToNode))
-  }, [classToNode, classes, dirtyClasses, setNodes])
+    // extract stuff from classes
+    const edges: Edge[] = []
+    for (const c of classes) {
+      // find assoziations
+      for (const c2 of classes) {
+        if (c2.name != c.name) {
+          if (c2.content.match(new RegExp(`\\b${c.name}\\b`))) {
+            console.log('hi')
+            edges.push({
+              id: `${c2.name}-->${c.name}`,
+              source: c2.name,
+              target: c.name,
+              style: { strokeDasharray: '4 4' },
+              markerEnd: { type: MarkerType.Arrow, height: 17, width: 17 },
+            })
+          }
+        }
+      }
+    }
+    setEdges(edges)
+  }, [classToNode, classes, dirtyClasses, setEdges, setNodes])
 
   return (
     <ReactFlow
@@ -64,8 +87,9 @@ export function ClassDiagram() {
       onEdgesChange={onEdgesChange}
       nodeTypes={{ SingleClass }}
       proOptions={proOptions}
-      minZoom={1}
-      maxZoom={1}
+      minZoom={0.5}
+      maxZoom={1.5}
+      fitView={true}
     >
       <Background />
     </ReactFlow>
@@ -74,14 +98,15 @@ export function ClassDiagram() {
 
 const SingleClass = ({
   data,
-  id,
 }: {
   data: { label: string; dirty: boolean }
   id: string
 }) => {
   return (
     <>
-      <NodeResizeControl
+      <Handle type="target" position={Position.Left} className="opacity-0" />
+      <Handle type="source" position={Position.Right} className="opacity-0" />
+      {/*<NodeResizeControl
         style={{ background: 'transparent', border: 'none' }}
         onResizeEnd={(e) => {
           UIStore.update((s) => {
@@ -93,14 +118,14 @@ const SingleClass = ({
             c.size.height = e.y
           })
         }}
-        minWidth={100}
-        minHeight={50}
+        minWidth={140}
+        minHeight={60}
       >
         <FaIcon
           icon={faUpRightAndDownLeftFromCenter}
           className="-scale-x-100 absolute right-1 bottom-1"
         />
-      </NodeResizeControl>
+      </NodeResizeControl>*/}
       <div className="h-full flex flex-col">
         <p
           className={clsx(
@@ -110,7 +135,7 @@ const SingleClass = ({
           {data.label}
         </p>
         <div
-          className={clsx('pl-2 pt-1 pb-6 pr-6 flex-grow')}
+          className={clsx('pl-2 pt-3 pb-6 pr-6 flex-grow')}
           style={
             data.dirty
               ? {
@@ -126,7 +151,7 @@ const SingleClass = ({
           }
         >
           <button
-            className="underline"
+            className="bg-gray-100 hover:bg-green-200 w-7 h-7 rounded"
             onClick={() => {
               UIStore.update((s) => {
                 if (!s.openClasses.includes(data.label)) {
@@ -136,11 +161,10 @@ const SingleClass = ({
               })
             }}
           >
-            Bearbeiten
+            <FaIcon icon={faPencil} />
           </button>
-          <br />
           <button
-            className="underline"
+            className="bg-gray-100 hover:bg-red-200 w-7 h-7 rounded ml-3"
             onClick={() => {
               const result = confirm('Klasse wirklich löschen?')
               if (result) {
@@ -158,7 +182,7 @@ const SingleClass = ({
               }
             }}
           >
-            Entfernen
+            <FaIcon icon={faTrash} />
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { ClassDiagram } from '@/components/ClassDiagram'
 import { Editor } from '@/components/Editor'
-import { Runner } from '@/components/Runner'
+import { Guide } from '@/components/Guide'
 import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
 import { useJavaRuntime } from './JavaRuntime'
@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { saveProject } from '@/actions/save-project'
 import { MetaEditor } from './MetaEditor'
 import { Resources } from './Resources'
+import { ReflexContainer, ReflexElement, ReflexSplitter } from 'react-reflex'
 
 export default function IDE() {
   const openClasses = UIStore.useState((s) => s.openClasses)
@@ -322,28 +323,40 @@ export default function IDE() {
             </select>
           </div>
         </div>
-        <div className="h-[calc(100%-44px)] flex">
-          <div className="w-[calc(100%-500px)] h-full border-r-2 border-purple-300">
-            <div className="flex flex-col h-full">
-              <div className="h-[calc(100%-120px)]">
-                {editResources ? (
-                  <Resources />
-                ) : editMeta ? (
-                  <MetaEditor />
-                ) : openClass == null ? (
-                  <ClassDiagram />
-                ) : (
-                  <Editor />
-                )}
+        <div className="h-[calc(100%-44px)]">
+          <ReflexContainer orientation="vertical" windowResizeAware>
+            <ReflexElement
+              className="h-full !overflow-hidden relative"
+              minSize={0}
+            >
+              <div className="flex flex-col h-full">
+                <div className="h-[calc(100%-120px)]">
+                  {' '}
+                  {editResources ? (
+                    <Resources />
+                  ) : editMeta ? (
+                    <MetaEditor />
+                  ) : openClass == null ? (
+                    <ClassDiagram />
+                  ) : (
+                    <Editor />
+                  )}
+                </div>
+                <div className="h-[120px] border-t-2 border-purple-300">
+                  <ObjectBench />
+                </div>
               </div>
-              <div className="h-[120px] border-t-2 border-purple-300">
-                <ObjectBench />
-              </div>
-            </div>
-          </div>
-          <div className="w-[500px]">
-            <Runner />
-          </div>
+            </ReflexElement>
+            <ReflexSplitter
+              style={{ width: 6 }}
+              className="!bg-purple-200 !border-0 hover:!bg-purple-400 active:!bg-purple-400"
+            />
+            <ReflexElement minSize={0}>
+              <Guide />
+            </ReflexElement>
+          </ReflexContainer>
+
+          <div className="w-[500px]"></div>
         </div>
       </div>
     </>

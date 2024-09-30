@@ -6,7 +6,7 @@ import Markdown from 'react-markdown'
 import { FaIcon } from './FaIcon'
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
-export function Runner() {
+export function Guide() {
   const displayRef = useRef<HTMLDivElement>(null)
   const output = UIStore.useState((s) => s.project!.output)
   const project = UIStore.useState((s) => s.project)
@@ -26,7 +26,7 @@ export function Runner() {
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="relative h-[360px] absolute">
+        <div className="relative h-[360px] absolute hidden">
           <div
             className={clsx(
               'absolute inset-0',
@@ -51,7 +51,7 @@ export function Runner() {
           </div>
         </div>
         <div className="h-[calc(100%-360px)] flex flex-col border-t-2 border-purple-300">
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 hidden">
             <button
               className={clsx(
                 'border-r-2 border-r-gray-200 px-4 py-1',
@@ -86,7 +86,7 @@ export function Runner() {
               Challenges (0/4)
             </button>
           </div>
-          <div className="overflow-auto p-2 relative">
+          <div className="overflow-auto px-2 relative">
             <div className="absolute right-2 top-2">
               <button
                 className="bg-gray-100 hover:bg-gray-200 w-7 h-7 rounded"

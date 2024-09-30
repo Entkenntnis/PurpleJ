@@ -99,18 +99,30 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       },
     })
 
-    await cheerpjRunMain(
-      'com.sun.tools.javac.Main',
-      '/app/tools.jar',
-      '-version',
-    )
+    // System is loaded, what to do next?
+
     runtime.current.standardLib = await cheerpjRunLibrary('')
+
+    if (UIStore.getRawState().page !== 'ide') {
+      // warm up by loading javac
+      await cheerpjRunMain(
+        'com.sun.tools.javac.Main',
+        '/app/tools.jar',
+        '-version',
+      )
+    } else {
+      // directly start compiling
+    }
 
     UIStore.update((s) => {
       s.controllerState = 'compile-if-dirty'
       // s.dirtyClasses = s.classes.map((c) => c.name)
     })
   }
+
+  /*async function compile() {
+    // TODO
+  }*/
 
   async function compileAndRun() {
     saveProject()
