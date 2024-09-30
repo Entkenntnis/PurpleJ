@@ -64,7 +64,7 @@ export function Guide() {
             </div>
             {tab == 0 && (
               <div className="prose mt-3 prose-p:text-gray-900 prose-li:text-gray-900 prose-code:before:content-none prose-code:after:content-none">
-                <h2 className="mr-10">{project.title}</h2>
+                <h2 className="mr-10">{project!.title}</h2>
                 <Markdown>{project!.description}</Markdown>
               </div>
             )}

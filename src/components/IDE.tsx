@@ -173,8 +173,8 @@ export default function IDE() {
                 className={clsx(
                   'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
                   showOutput
-                    ? 'mt-2 pb-2 rounded-bl-none rounded-br-none bg-green-300 '
-                    : 'bg-green-100 hover:bg-green-200',
+                    ? 'mt-2 pb-2 rounded-bl-none rounded-br-none bg-blue-300 '
+                    : 'bg-blue-100 hover:bg-blue-200',
                 )}
                 onClick={() => {
                   UIStore.update((s) => {
@@ -365,7 +365,7 @@ export default function IDE() {
                 <div className="h-[calc(100%-120px)] relative">
                   <div
                     className={clsx(
-                      'absolute inset-0 bg-white',
+                      'absolute inset-0 bg-blue-100',
                       output !== 'display' || !showOutput
                         ? 'opacity-0'
                         : 'z-10',

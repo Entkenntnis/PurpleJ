@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/*.cheerpjNC::before {
-  content: '' !important;
-}*/
+.cheerpjNC::before {
+  top: 0;
+  bottom: unset !important;
+  border-top: unset !important;
+  border-bottom: 1px solid black;
+}
 
 .cheerpjLoading {
   background: none !important;
