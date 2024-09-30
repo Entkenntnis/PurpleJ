@@ -53,7 +53,6 @@ export function ClassDiagram() {
       for (const c2 of classes) {
         if (c2.name != c.name) {
           if (c2.content.match(new RegExp(`\\b${c.name}\\b`))) {
-            console.log('hi')
             edges.push({
               id: `${c2.name}-->${c.name}`,
               source: c2.name,
@@ -76,9 +75,8 @@ export function ClassDiagram() {
         for (const event of e) {
           if (event.type == 'position' && !event.dragging) {
             UIStore.update((s) => {
-              s.project!.classes.find(
-                (_, i) => i.toString() === event.id,
-              )!.position = event.position!
+              s.project!.classes.find((c) => c.name === event.id)!.position =
+                event.position!
             })
           }
         }
