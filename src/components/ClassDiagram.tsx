@@ -14,6 +14,10 @@ import clsx from 'clsx'
 import { useCallback, useEffect } from 'react'
 import { FaIcon } from './FaIcon'
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { AstNode, cursorToAstNode, prettyPrintAstNode } from '@/lang/astNode'
+import { java } from '@codemirror/lang-java'
+import { parser } from '@lezer/java'
+import { Text } from '@codemirror/state'
 
 const proOptions = { hideAttribution: true }
 
@@ -50,13 +54,26 @@ export function ClassDiagram() {
     const edges: Edge[] = []
     for (const c of classes) {
       // find assoziations
+      const tree = parser.parse(c.content)
+      const t = cursorToAstNode(tree.cursor(), Text.of(c.content.split('\n')))
+      const refs: string[] = []
+      const scan = (t: AstNode) => {
+        if (t.name == 'TypeName') {
+          refs.push(t.text())
+        }
+        if (t.name == 'Identifier') {
+          refs.push(t.text())
+        }
+        t.children.forEach(scan)
+      }
+      scan(t)
       for (const c2 of classes) {
         if (c2.name != c.name) {
-          if (c2.content.match(new RegExp(`\\b${c.name}\\b`))) {
+          if (refs.includes(c2.name)) {
             edges.push({
               id: `${c2.name}-->${c.name}`,
-              source: c2.name,
-              target: c.name,
+              target: c2.name,
+              source: c.name,
               style: { strokeDasharray: '4 4' },
               markerEnd: { type: MarkerType.Arrow, height: 17, width: 17 },
             })
