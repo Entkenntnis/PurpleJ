@@ -55,6 +55,9 @@ export function ObjectBench() {
             <button
               onClick={() => {
                 runtime.getRuntime().exit()
+                UIStore.update((s) => {
+                  s.showOutput = false
+                })
               }}
               className="ml-6 px-2 py-0.5 bg-red-300 hover:bg-red-400 rounded"
             >

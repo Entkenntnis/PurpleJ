@@ -13,5 +13,6 @@ export function loadProject(p: Project, id?: string) {
     s.showEditMetaTab = false
     s.showResourcesTab = false
     s.editResources = false
+    s.showOutput = false
   })
 }

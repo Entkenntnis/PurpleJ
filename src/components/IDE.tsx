@@ -13,7 +13,7 @@ import {
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons'
 import { FaIcon } from './FaIcon'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { saveProject } from '@/actions/save-project'
 import { MetaEditor } from './MetaEditor'
 import { Resources } from './Resources'
@@ -29,8 +29,16 @@ export default function IDE() {
   const showResourcesTab = UIStore.useState((s) => s.showResourcesTab)
   const editResources = UIStore.useState((s) => s.editResources)
   const files = UIStore.useState((s) => s.project!.files)
+  const controllerState = UIStore.useState((s) => s.controllerState)
+  const showOutput = UIStore.useState((s) => s.showOutput)
 
   const runtime = useJavaRuntime()
+
+  const displayRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    runtime.getRuntime().displayElement = displayRef.current
+  }, [runtime])
 
   const [showMenu, setShowMenu] = useState(false)
 
@@ -159,11 +167,31 @@ export default function IDE() {
               }}
             >
               <FaIcon icon={faBars} /> Menü
-            </button>
+            </button>{' '}
+            {controllerState == 'running' && (
+              <div
+                className={clsx(
+                  'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
+                  showOutput
+                    ? 'mt-2 pb-2 rounded-bl-none rounded-br-none bg-green-300 '
+                    : 'bg-green-100 hover:bg-green-200',
+                )}
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.openClass = null
+                    s.editMeta = false
+                    s.editResources = false
+                    s.showOutput = true
+                  })
+                }}
+              >
+                Ausgabe
+              </div>
+            )}
             <button
               className={clsx(
                 'px-2 py-0.5 rounded',
-                openClass === null && !editMeta && !editResources
+                openClass === null && !editMeta && !editResources && !showOutput
                   ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
                   : 'bg-purple-100 hover:bg-purple-200',
               )}
@@ -172,6 +200,7 @@ export default function IDE() {
                   s.openClass = null
                   s.editMeta = false
                   s.editResources = false
+                  s.showOutput = false
                 })
               }}
             >
@@ -200,6 +229,7 @@ export default function IDE() {
                       s.editMeta = false
                       s.showEditMetaTab = false
                       s.openClass = null
+                      s.showOutput = false
                     })
                     e.stopPropagation()
                     e.preventDefault()
@@ -222,6 +252,7 @@ export default function IDE() {
                     s.openClass = null
                     s.editMeta = false
                     s.editResources = true
+                    s.showOutput = false
                   })
                 }}
               >
@@ -258,6 +289,7 @@ export default function IDE() {
                     }
                     s.editMeta = false
                     s.editResources = false
+                    s.showOutput = false
                   })
                 }}
               >
@@ -330,8 +362,33 @@ export default function IDE() {
               minSize={0}
             >
               <div className="flex flex-col h-full">
-                <div className="h-[calc(100%-120px)]">
-                  {' '}
+                <div className="h-[calc(100%-120px)] relative">
+                  <div
+                    className={clsx(
+                      'absolute inset-0 bg-white',
+                      output !== 'display' || !showOutput
+                        ? 'opacity-0'
+                        : 'z-10',
+                    )}
+                    ref={displayRef}
+                  >
+                    <div className="h-full flex items-center justify-center text-4xl text-gray-300">
+                      leere Ausgabe
+                    </div>
+                  </div>
+                  <div
+                    className={clsx(
+                      'absolute inset-0 bg-teal-50 overflow-auto',
+                      output !== 'terminal' || !showOutput
+                        ? 'opacity-0'
+                        : 'z-10',
+                    )}
+                  >
+                    <pre
+                      className="font-mono text-sm h-full px-1 text-wrap"
+                      id="console"
+                    />
+                  </div>
                   {editResources ? (
                     <Resources />
                   ) : editMeta ? (

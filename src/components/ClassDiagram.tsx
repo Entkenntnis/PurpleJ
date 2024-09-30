@@ -102,7 +102,7 @@ export function ClassDiagram() {
       nodeTypes={{ SingleClass }}
       proOptions={proOptions}
       minZoom={0.5}
-      maxZoom={1.5}
+      maxZoom={1}
       fitView={true}
     >
       <Background />

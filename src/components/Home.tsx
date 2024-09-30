@@ -3,11 +3,16 @@ import { Project } from '@/data/types'
 import { useEffect, useState } from 'react'
 import { Spinner } from './Spinner'
 import { loadProject } from '@/actions/load-project'
+import graph from '../../content/graph.json'
 
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
 
   useEffect(() => {
+    if (window.location.hash == '#graph') {
+      loadProject(graph as Project)
+      return
+    }
     const keys = Object.keys(localStorage).filter((key) =>
       key.startsWith('purplej_project_'),
     )

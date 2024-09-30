@@ -23,6 +23,7 @@ export interface IUIStore {
   editMeta: boolean
   showResourcesTab: boolean
   editResources: boolean
+  showOutput: boolean
 }
 
 export interface Runtime {

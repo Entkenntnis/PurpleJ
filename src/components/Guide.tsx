@@ -1,56 +1,18 @@
 import { UIStore } from '@/store/UIStore'
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
-import { useJavaRuntime } from './JavaRuntime'
+import { useState } from 'react'
 import Markdown from 'react-markdown'
 import { FaIcon } from './FaIcon'
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
 export function Guide() {
-  const displayRef = useRef<HTMLDivElement>(null)
-  const output = UIStore.useState((s) => s.project!.output)
   const project = UIStore.useState((s) => s.project)
-
-  const runtime = useJavaRuntime()
-
-  useEffect(() => {
-    runtime.getRuntime().displayElement = displayRef.current
-  }, [runtime])
-
   const [tab, setTab] = useState(0)
-
-  if (!project) {
-    return <>bad</>
-  }
 
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="relative h-[360px] absolute hidden">
-          <div
-            className={clsx(
-              'absolute inset-0',
-              output !== 'display' ? 'opacity-0' : 'z-10',
-            )}
-            ref={displayRef}
-          >
-            <div className="h-full flex items-center justify-center text-4xl text-gray-300">
-              leere Ausgabe
-            </div>
-          </div>
-          <div
-            className={clsx(
-              'absolute inset-0 bg-teal-50 overflow-auto',
-              output !== 'terminal' ? 'opacity-0' : 'z-10',
-            )}
-          >
-            <pre
-              className="font-mono text-sm h-full px-1 text-wrap"
-              id="console"
-            />
-          </div>
-        </div>
-        <div className="h-[calc(100%-360px)] flex flex-col border-t-2 border-purple-300">
+        <div className="h-[calc(100%-360px)] flex flex-col">
           <div className="border-b border-gray-200 hidden">
             <button
               className={clsx(

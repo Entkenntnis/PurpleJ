@@ -206,6 +206,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     })
     UIStore.update((s) => {
       s.controllerState = 'running'
+      s.showOutput = true
     })
     document.getElementById('console')!.innerHTML = ''
     if (runtime.current.displayElement) {

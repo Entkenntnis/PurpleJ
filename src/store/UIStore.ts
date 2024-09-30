@@ -17,4 +17,5 @@ export const UIStore = new Store<IUIStore>({
   editMeta: false,
   showResourcesTab: false,
   editResources: false,
+  showOutput: false,
 })
