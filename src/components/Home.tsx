@@ -24,6 +24,7 @@ export function Home() {
     locals.sort((a, b) => b[1].lastUpdated - a[1].lastUpdated)
 
     setLocal(locals)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

@@ -384,7 +384,7 @@ export default function IDE() {
                     className={clsx(
                       'absolute inset-0 bg-blue-100',
                       output !== 'display' || !showOutput
-                        ? 'opacity-0'
+                        ? 'opacity-0 z-0 pointer-events-none'
                         : 'z-10',
                     )}
                     ref={displayRef}
@@ -397,7 +397,7 @@ export default function IDE() {
                     className={clsx(
                       'absolute inset-0 bg-teal-50 overflow-auto',
                       output !== 'terminal' || !showOutput
-                        ? 'opacity-0'
+                        ? 'opacity-0 z-0 pointer-events-none'
                         : 'z-10',
                     )}
                   >

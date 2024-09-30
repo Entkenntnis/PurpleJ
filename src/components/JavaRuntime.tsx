@@ -116,7 +116,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         // s.dirtyClasses = s.classes.map((c) => c.name)
       })
     } else {
-      await compile()
+      compile()
     }
   }
 
@@ -211,7 +211,6 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       s.showOutput = true
     })
     document.getElementById('console')!.innerHTML = ''
-    console.log('trying to create display', runtime.current)
     if (runtime.current.displayElement) {
       runtime.current.displayElement.innerHTML = ''
       cheerpjCreateDisplay(-1, -1, runtime.current.displayElement)
