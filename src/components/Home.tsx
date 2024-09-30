@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { Spinner } from './Spinner'
 import { loadProject } from '@/actions/load-project'
 import graph from '../../content/graph.json'
+import { useJavaRuntime } from './JavaRuntime'
 
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
+  const runtime = useJavaRuntime()
 
   useEffect(() => {
     if (window.location.hash == '#graph') {
-      loadProject(graph as Project)
+      loadProject(graph as Project, runtime.getRuntime())
       return
     }
     const keys = Object.keys(localStorage).filter((key) =>
@@ -45,7 +47,7 @@ export function Home() {
                   className="my-4 bg-white py-2 px-3 rounded hover:bg-gray-100 cursor-pointer"
                   tabIndex={0}
                   onClick={() => {
-                    loadProject(p)
+                    loadProject(p, runtime.getRuntime())
                   }}
                 >
                   <h2 className="font-bold">{p.title}</h2>
@@ -71,7 +73,7 @@ export function Home() {
                     ) {
                       try {
                         const project = JSON.parse(e.target.result) as Project
-                        loadProject(project)
+                        loadProject(project, runtime.getRuntime())
                       } catch (e) {
                         console.log(e)
                         alert('Projekt konnte nicht geladen werden')
@@ -144,7 +146,7 @@ export function Home() {
         <button
           className="text-purple-600 hover:underline cursor-pointer"
           onClick={() => {
-            loadProject(project, id)
+            loadProject(project, runtime.getRuntime(), id)
           }}
         >
           {project.title} [{new Date(project.lastUpdated).toLocaleString()}]

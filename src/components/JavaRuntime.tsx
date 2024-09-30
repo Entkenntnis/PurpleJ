@@ -1,4 +1,3 @@
-import { saveProject } from '@/actions/save-project'
 import { ClassAPI, InteractiveElement, Runtime } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 import Script from 'next/script'
@@ -16,7 +15,8 @@ export function useJavaRuntime() {
 
 export function JavaRuntime({ children }: { children: ReactNode }) {
   const runtime = useRef<Runtime>({
-    compileAndRun,
+    run,
+    compile,
     displayElement: null,
     getInteractiveElements,
     exit() {},
@@ -110,34 +110,31 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         '/app/tools.jar',
         '-version',
       )
-    } else {
-      // directly start compiling
-    }
 
-    UIStore.update((s) => {
-      s.controllerState = 'compile-if-dirty'
-      // s.dirtyClasses = s.classes.map((c) => c.name)
-    })
+      UIStore.update((s) => {
+        s.controllerState = 'compile-if-dirty'
+        // s.dirtyClasses = s.classes.map((c) => c.name)
+      })
+    } else {
+      await compile()
+    }
   }
 
-  /*async function compile() {
-    // TODO
-  }*/
-
-  async function compileAndRun() {
-    saveProject()
+  async function compile() {
+    UIStore.update((s) => {
+      s.controllerState = 'compiling'
+    })
     const ui = UIStore.getRawState()
 
     const d = `/files/${ui.projectId}/`
 
-    if (ui.dirtyClasses.length > 0) {
-      // This is the compile step
-      const encoder = new TextEncoder()
-      const sourceFiles = [`/str/${ui.projectId}/SyntheticMain.java`]
+    // This is the compile step
+    const encoder = new TextEncoder()
+    const sourceFiles = [`/str/${ui.projectId}/SyntheticMain.java`]
 
-      cheerpOSAddStringFile(
-        sourceFiles[0],
-        encoder.encode(`class SyntheticMain {
+    cheerpOSAddStringFile(
+      sourceFiles[0],
+      encoder.encode(`class SyntheticMain {
             public static void main(String[] args) {
               System.out.println("Interaktiver Modus bereit");
               entry();
@@ -146,60 +143,65 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
             }
             public static native void entry();
           }`),
-      )
+    )
 
-      const File = await runtime.current.standardLib.java.io.File
-      const f = await new File(d)
-      await f.mkdir()
+    const File = await runtime.current.standardLib.java.io.File
+    const f = await new File(d)
+    await f.mkdir()
 
-      if (ui.project && ui.project.files) {
-        const Files = await runtime.current.standardLib.java.nio.file.Files
-        const StandardCopyOption =
-          await runtime.current.standardLib.java.nio.file.StandardCopyOption
-        for (const file of ui.project.files) {
-          const src = `/str/${ui.projectId}/` + file.name
-          cheerpOSAddStringFile(src, encoder.encode(file.content))
-          const p1 = await (await new File(src)).toPath()
-          const f2 = await new File('/files/' + file.name)
-          const parent = await f2.getParentFile()
-          await parent.mkdirs()
-          const p2 = await f2.toPath()
-          await Files.copy(p1, p2, [StandardCopyOption.REPLACE_EXISTING])
-        }
-      }
-
-      for (const c of ui.dirtyClasses) {
-        const filename = `/str/${ui.projectId}/${c}.java`
-        cheerpOSAddStringFile(
-          filename,
-          encoder.encode(
-            ui.project!.classes.find((el) => el.name == c)!.content,
-          ),
-        )
-        sourceFiles.push(filename)
-      }
-      UIStore.update((s) => {
-        s.controllerState = 'compiling'
-      })
-
-      document.getElementById('console')!.innerHTML = ''
-      const code = await cheerpjRunMain(
-        'com.sun.tools.javac.Main',
-        '/app/tools.jar:/files/:' + d,
-        ...sourceFiles,
-        '-d',
-        d,
-        '-Xlint:-serial,-unchecked',
-      )
-      if (code !== 0) {
-        UIStore.update((s) => {
-          s.controllerState = 'compile-if-dirty'
-        })
-        return
+    if (ui.project && ui.project.files) {
+      const Files = await runtime.current.standardLib.java.nio.file.Files
+      const StandardCopyOption =
+        await runtime.current.standardLib.java.nio.file.StandardCopyOption
+      for (const file of ui.project.files) {
+        const src = `/str/${ui.projectId}/` + file.name
+        cheerpOSAddStringFile(src, encoder.encode(file.content))
+        const p1 = await (await new File(src)).toPath()
+        const f2 = await new File('/files/' + file.name)
+        const parent = await f2.getParentFile()
+        await parent.mkdirs()
+        const p2 = await f2.toPath()
+        await Files.copy(p1, p2, [StandardCopyOption.REPLACE_EXISTING])
       }
     }
+
+    for (const c of ui.dirtyClasses) {
+      const filename = `/str/${ui.projectId}/${c}.java`
+      cheerpOSAddStringFile(
+        filename,
+        encoder.encode(ui.project!.classes.find((el) => el.name == c)!.content),
+      )
+      sourceFiles.push(filename)
+    }
+
+    document.getElementById('console')!.innerHTML = ''
+
+    const code = await cheerpjRunMain(
+      'com.sun.tools.javac.Main',
+      '/app/tools.jar:/files/:' + d,
+      ...sourceFiles,
+      '-d',
+      d,
+      '-Xlint:-serial,-unchecked',
+    )
+    if (code === 0) {
+      UIStore.update((s) => {
+        s.controllerState = 'compile-if-dirty'
+        s.syntheticMainCompiled = true
+        s.dirtyClasses = []
+      })
+    } else {
+      UIStore.update((s) => {
+        s.controllerState = 'compile-if-dirty'
+        s.syntheticMainCompiled = false
+      })
+    }
+  }
+
+  async function run() {
+    const ui = UIStore.getRawState()
+    const d = `/files/${ui.projectId}/`
     UIStore.update((s) => {
-      s.dirtyClasses = []
       s.instances = []
       s.inAction = true
       s.api = {}
@@ -209,6 +211,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       s.showOutput = true
     })
     document.getElementById('console')!.innerHTML = ''
+    console.log('trying to create display', runtime.current)
     if (runtime.current.displayElement) {
       runtime.current.displayElement.innerHTML = ''
       cheerpjCreateDisplay(-1, -1, runtime.current.displayElement)

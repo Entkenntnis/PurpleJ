@@ -1,7 +1,7 @@
-import { Project } from '@/data/types'
+import { Project, Runtime } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
 
-export function loadProject(p: Project, id?: string) {
+export function loadProject(p: Project, r: Runtime, id?: string) {
   UIStore.update((s) => {
     s.dirtyClasses = p.classes.map((c) => c.name)
     s.openClass = null
@@ -14,5 +14,9 @@ export function loadProject(p: Project, id?: string) {
     s.showResourcesTab = false
     s.editResources = false
     s.showOutput = false
+    s.syntheticMainCompiled = false
   })
+  if (UIStore.getRawState().controllerState != 'loading') {
+    r.compile()
+  }
 }

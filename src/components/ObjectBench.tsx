@@ -4,11 +4,13 @@ import clsx from 'clsx'
 import { FaIcon } from './FaIcon'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { Spinner } from './Spinner'
+import { saveProject } from '@/actions/save-project'
 
 export function ObjectBench() {
   const controllerState = UIStore.useState((s) => s.controllerState)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
   const inAction = UIStore.useState((s) => s.inAction)
+  const syntheticMainCompiled = UIStore.useState((s) => s.syntheticMainCompiled)
 
   const runtime = useJavaRuntime()
 
@@ -35,11 +37,16 @@ export function ObjectBench() {
             <button
               className="px-3 py-2 bg-purple-400 hover:bg-purple-500 rounded"
               onClick={async () => {
-                runtime.getRuntime().compileAndRun()
+                saveProject()
+
+                if (dirtyClasses.length > 0 || !syntheticMainCompiled) {
+                  await runtime.getRuntime().compile()
+                }
+                runtime.getRuntime().run()
               }}
             >
               <FaIcon icon={faPlay} className="mr-3" />
-              {dirtyClasses.length == 0 ? (
+              {dirtyClasses.length == 0 && syntheticMainCompiled ? (
                 <>Interaktiven Modus starten</>
               ) : (
                 <>Kompilieren und interaktiven Modus starten</>
@@ -50,20 +57,6 @@ export function ObjectBench() {
       )}
       {controllerState === 'running' && (
         <div>
-          <p>
-            VM gestartet
-            <button
-              onClick={() => {
-                runtime.getRuntime().exit()
-                UIStore.update((s) => {
-                  s.showOutput = false
-                })
-              }}
-              className="ml-6 px-2 py-0.5 bg-red-300 hover:bg-red-400 rounded"
-            >
-              VM zurücksetzen
-            </button>
-          </p>
           <div className="mt-3 flex flex-wrap justify-start">
             {runtime
               .getRuntime()

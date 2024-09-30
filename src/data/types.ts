@@ -24,10 +24,12 @@ export interface IUIStore {
   showResourcesTab: boolean
   editResources: boolean
   showOutput: boolean
+  syntheticMainCompiled: boolean
 }
 
 export interface Runtime {
-  compileAndRun: () => void
+  run: () => void
+  compile: () => void
   getInteractiveElements(): InteractiveElement[]
   exit: () => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -38,7 +38,8 @@ export default function IDE() {
 
   useEffect(() => {
     runtime.getRuntime().displayElement = displayRef.current
-  }, [runtime])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayRef.current])
 
   const [showMenu, setShowMenu] = useState(false)
 
@@ -47,7 +48,7 @@ export default function IDE() {
       <div className="h-full flex flex-col">
         <div
           className={clsx(
-            'absolute top-[42px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-10 pl-3',
+            'absolute top-[42px] bottom-0 w-[300px] bg-white border-purple-300 border-r-2 border-t-2 rounded-tr-xl rounded-br-xl z-[200] pl-3',
             'transition-all shadow-md flex justify-between flex-col',
             showMenu ? 'left-0' : '-left-[300px]',
           )}
@@ -153,7 +154,7 @@ export default function IDE() {
             </p>
           </div>
         </div>
-        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between items-baseline border-b-2 border-b-purple-300">
+        <div className="h-11 bg-gray-50 flex-grow-0 flex-shrink-0 flex justify-between border-b-2 border-b-purple-300">
           <div className="flex items-baseline justify-start gap-4 pl-4">
             <button
               className={clsx(
@@ -167,33 +168,13 @@ export default function IDE() {
               }}
             >
               <FaIcon icon={faBars} /> Menü
-            </button>{' '}
-            {controllerState == 'running' && (
-              <div
-                className={clsx(
-                  'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
-                  showOutput
-                    ? 'mt-2 pb-2 rounded-bl-none rounded-br-none bg-blue-300 '
-                    : 'bg-blue-100 hover:bg-blue-200',
-                )}
-                onClick={() => {
-                  UIStore.update((s) => {
-                    s.openClass = null
-                    s.editMeta = false
-                    s.editResources = false
-                    s.showOutput = true
-                  })
-                }}
-              >
-                Ausgabe
-              </div>
-            )}
+            </button>
             <button
               className={clsx(
                 'px-2 py-0.5 rounded',
                 openClass === null && !editMeta && !editResources && !showOutput
-                  ? 'mt-2 pb-2.5 rounded-bl-none rounded-br-none bg-purple-300 '
-                  : 'bg-purple-100 hover:bg-purple-200',
+                  ? 'mt-2 pb-2 rounded-bl-none rounded-br-none bg-yellow-300 '
+                  : 'bg-yellow-100 hover:bg-yellow-200',
               )}
               onClick={() => {
                 UIStore.update((s) => {
@@ -233,6 +214,53 @@ export default function IDE() {
                     })
                     e.stopPropagation()
                     e.preventDefault()
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {controllerState == 'running' && (
+              <div
+                className={clsx(
+                  'px-2 py-0.5 rounded cursor-pointer flex items-baseline',
+                  showOutput
+                    ? 'mt-2 pb-1.5 rounded-bl-none rounded-br-none bg-purple-400 '
+                    : 'bg-purple-200 hover:bg-purple-300',
+                )}
+                onClick={() => {
+                  UIStore.update((s) => {
+                    s.openClass = null
+                    s.editMeta = false
+                    s.editResources = false
+                    s.showOutput = true
+                  })
+                }}
+              >
+                Ausgabe:{' '}
+                <select
+                  className="p-1 ml-3 rounded"
+                  value={output}
+                  onChange={(e) => {
+                    UIStore.update((s) => {
+                      s.project!.output = e.target.value as
+                        | 'terminal'
+                        | 'display'
+                    })
+                  }}
+                >
+                  <option value="display">Bildschirm</option>
+                  <option value="terminal">Terminal</option>
+                </select>
+                <button
+                  className="inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500"
+                  onClick={(e) => {
+                    runtime.getRuntime().exit()
+                    UIStore.update((s) => {
+                      s.showOutput = false
+                    })
+                    e.preventDefault()
+                    e.stopPropagation()
                   }}
                 >
                   ×
@@ -314,46 +342,35 @@ export default function IDE() {
                 </button>
               </div>
             ))}
-            <button
-              className="px-2 py-0.5 bg-yellow-100 hover:bg-yellow-200 rounded ml-4"
-              onClick={() => {
-                const name = prompt('Welchen Namen soll die Klasse haben?')
-                if (name) {
-                  UIStore.update((s) => {
-                    s.project!.classes.push({
-                      name,
-                      content: `public class ${name} {
+            {controllerState != 'running' && (
+              <button
+                className="px-2 py-0.5 bg-yellow-100 hover:bg-yellow-200 rounded ml-4"
+                onClick={() => {
+                  const name = prompt('Welchen Namen soll die Klasse haben?')
+                  if (name) {
+                    UIStore.update((s) => {
+                      s.project!.classes.push({
+                        name,
+                        content: `public class ${name} {
     public ${name} () {
         
     }
 }`,
-                      position: {
-                        x: Math.random() * 300,
-                        y: Math.random() * 300,
-                      },
+                        position: {
+                          x: Math.random() * 300,
+                          y: Math.random() * 300,
+                        },
+                      })
+                      s.dirtyClasses.push(name)
                     })
-                  })
-                }
-              }}
-            >
-              + Neue Klasse
-            </button>
+                  }
+                }}
+              >
+                + Neue Klasse
+              </button>
+            )}
           </div>
-          <div className="pr-4">
-            Ausgabe:{' '}
-            <select
-              className="p-1"
-              value={output}
-              onChange={(e) => {
-                UIStore.update((s) => {
-                  s.project!.output = e.target.value as 'terminal' | 'display'
-                })
-              }}
-            >
-              <option value="display">Bildschirm</option>
-              <option value="terminal">Terminal</option>
-            </select>
-          </div>
+          <div className="pr-4 mt-1.5"></div>
         </div>
         <div className="h-[calc(100%-44px)]">
           <ReflexContainer orientation="vertical" windowResizeAware>

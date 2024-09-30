@@ -18,4 +18,5 @@ export const UIStore = new Store<IUIStore>({
   showResourcesTab: false,
   editResources: false,
   showOutput: false,
+  syntheticMainCompiled: false,
 })
