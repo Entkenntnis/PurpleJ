@@ -30,30 +30,23 @@ export interface IUIStore {
 export interface Runtime {
   run: () => void
   compile: () => void
-  getInteractiveElements(): InteractiveElement[]
   exit: () => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lib: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  heap: { [key: string]: any }
+  heap: { [key: string]: { type: string; pointer: any } }
   displayElement: HTMLDivElement | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   standardLib: any
 }
 
 export interface ClassAPI {
-  hasPublicConstructor: boolean
-  publicConstructorParams: { name: string; type: string }[]
-  publicMethods: {
+  constructors: { name: string; type: string }[][]
+  methods: {
     name: string
     returnType: string
     parameters: { name: string; type: string }[]
   }[]
-}
-
-export interface InteractiveElement {
-  code: string
-  action: () => void
 }
 
 export interface Project {

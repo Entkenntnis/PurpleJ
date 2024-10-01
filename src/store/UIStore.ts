@@ -10,7 +10,6 @@ export const UIStore = new Store<IUIStore>({
   inAction: false,
   page: 'home',
   controllerState: 'loading',
-  cheerpjUrl: '',
   project: null,
   projectId: '',
   showEditMetaTab: false,

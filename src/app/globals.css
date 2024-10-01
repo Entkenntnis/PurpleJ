@@ -12,3 +12,75 @@
 .cheerpjLoading {
   background: none !important;
 }
+
+.dropdown {
+  @apply relative inline-block;
+}
+.dropdown > *:not(summary):focus {
+  @apply outline-none;
+}
+.dropdown .dropdown-content {
+  @apply absolute;
+}
+.dropdown:is(:not(details)) .dropdown-content {
+  @apply invisible opacity-0;
+}
+.dropdown-end .dropdown-content {
+  @apply end-0;
+}
+.dropdown-left .dropdown-content {
+  @apply bottom-auto end-full top-0;
+}
+.dropdown-right .dropdown-content {
+  @apply bottom-auto start-full top-0;
+}
+.dropdown-bottom .dropdown-content {
+  @apply bottom-auto top-full;
+}
+.dropdown-top .dropdown-content {
+  @apply bottom-full top-auto;
+}
+.dropdown-end.dropdown-right .dropdown-content {
+  @apply bottom-0 top-auto;
+}
+.dropdown-end.dropdown-left .dropdown-content {
+  @apply bottom-0 top-auto;
+}
+.dropdown.dropdown-open .dropdown-content,
+.dropdown:not(.dropdown-hover):focus .dropdown-content,
+.dropdown:focus-within .dropdown-content {
+  @apply visible opacity-100;
+}
+@media (hover: hover) {
+  .dropdown.dropdown-hover:hover .dropdown-content {
+    @apply visible opacity-100;
+  }
+}
+.dropdown:is(details) summary::-webkit-details-marker {
+  @apply hidden;
+}
+
+.menu {
+  @apply flex flex-col flex-wrap text-sm;
+  :where(li ul) {
+    @apply relative whitespace-nowrap;
+  }
+  :where(li:not(.menu-title) > *:not(ul, details, .menu-title, .btn)),
+  :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
+    @apply grid grid-flow-col content-start items-center gap-2;
+    grid-auto-columns: minmax(auto, max-content) auto max-content;
+    user-select: none;
+  }
+  & li.disabled {
+    @apply cursor-not-allowed select-none;
+  }
+  :where(li > .menu-dropdown:not(.menu-dropdown-show)) {
+    @apply hidden;
+  }
+}
+:where(.menu li) {
+  @apply relative flex shrink-0 flex-col flex-wrap items-stretch;
+  .badge {
+    @apply justify-self-end;
+  }
+}

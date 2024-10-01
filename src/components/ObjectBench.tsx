@@ -5,17 +5,19 @@ import { FaIcon } from './FaIcon'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { Spinner } from './Spinner'
 import { saveProject } from '@/actions/save-project'
+import { Fragment } from 'react'
 
 export function ObjectBench() {
   const controllerState = UIStore.useState((s) => s.controllerState)
   const dirtyClasses = UIStore.useState((s) => s.dirtyClasses)
   const inAction = UIStore.useState((s) => s.inAction)
   const syntheticMainCompiled = UIStore.useState((s) => s.syntheticMainCompiled)
+  const api = UIStore.useState((s) => s.api)
 
   const runtime = useJavaRuntime()
 
   return (
-    <div className={clsx('h-full overflow-auto', inAction && 'cursor-wait')}>
+    <div className={clsx('h-full', inAction && 'cursor-wait')}>
       {controllerState === 'loading' && (
         <div className="flex justify-center items-center h-full">
           <p className="italic text-gray-600 pb-6 animate-pulse">
@@ -56,9 +58,92 @@ export function ObjectBench() {
         </div>
       )}
       {controllerState === 'running' && (
-        <div>
-          <div className="mt-3 flex flex-wrap justify-start">
-            {runtime
+        <div className="flex justify-start items-center h-full">
+          {Object.entries(runtime.getRuntime().heap).map(([key, val]) => {
+            return (
+              <div
+                key={key}
+                className="h-[100px] bg-purple-300 mx-3 flex items-center px-2 rounded-xl text-center"
+              >
+                {key} :<br />
+                {val.type}
+              </div>
+            )
+          })}
+          {
+            <div className="dropdown dropdown-top dropdown-start">
+              <div
+                tabIndex={0}
+                role="button"
+                className="ml-3 px-2 py-0.5 bg-green-200 hover:bg-green-300 rounded text-center"
+              >
+                Objekt
+                <br />
+                erzeugen
+              </div>
+              <div
+                tabIndex={0}
+                className="dropdown-content bg-gray-100 rounded-box z-[1000] p-2 shadow mb-3 w-fit"
+              >
+                {Object.entries(api).map(([key, val]) => {
+                  return (
+                    <Fragment key={key}>
+                      {val.constructors.map((params, i) => (
+                        <div
+                          key={i}
+                          role="button"
+                          className="my-2 px-1 bg-white hover:bg-green-100"
+                          onClick={() => {
+                            void (async () => {
+                              UIStore.update((s) => {
+                                s.inAction = true
+                              })
+                              try {
+                                const C = await runtime.getRuntime().lib[key]
+                                const instance = await new C()
+                                let i = 1
+                                let instanceName = ''
+                                do {
+                                  instanceName = `${key.toLowerCase()}${i}`
+                                  i++
+                                } while (
+                                  runtime.getRuntime().heap[instanceName]
+                                )
+                                runtime.getRuntime().heap[instanceName] = {
+                                  pointer: instance,
+                                  type: key,
+                                }
+                                UIStore.update((s) => {
+                                  s.instances.push({
+                                    name: instanceName,
+                                    type: key,
+                                  })
+                                  s.inAction = false
+                                })
+                                if ('blur' in (document.activeElement ?? {})) {
+                                  // @ts-expect-error wrwr
+                                  document.activeElement.blur()
+                                }
+                              } catch (e) {
+                                console.log(e)
+                                alert('Fehler beim Erzeugen des Objekts')
+                                UIStore.update((s) => {
+                                  s.inAction = false
+                                })
+                              }
+                            })()
+                          }}
+                        >
+                          new&nbsp;{key}(TODO)
+                        </div>
+                      ))}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            </div>
+          }
+          {/*runtime
               .getRuntime()
               .getInteractiveElements()
               .map((el, i) => (
@@ -76,8 +161,7 @@ export function ObjectBench() {
                 >
                   {el.code}
                 </button>
-              ))}
-          </div>
+              ))*/}
         </div>
       )}
     </div>

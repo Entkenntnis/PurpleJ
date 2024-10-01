@@ -1,5 +1,8 @@
-import { ClassAPI, InteractiveElement, Runtime } from '@/data/types'
+import { ClassAPI, Runtime } from '@/data/types'
+import { AstNode, cursorToAstNode, prettyPrintAstNode } from '@/lang/astNode'
 import { UIStore } from '@/store/UIStore'
+import { Text } from '@codemirror/state'
+import { parser } from '@lezer/java'
 import Script from 'next/script'
 import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 
@@ -18,33 +21,18 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     run,
     compile,
     displayElement: null,
-    getInteractiveElements,
     exit() {},
     lib: {},
     heap: {},
     standardLib: {},
   })
 
-  const cheerpjUrl = UIStore.useState((s) => s.cheerpjUrl)
-
-  useEffect(() => {
-    if (UIStore.getRawState().controllerState == 'loading' && !cheerpjUrl) {
-      void (async () => {
-        const url = (
-          await (
-            await fetch('https://cjrtnc.leaningtech.com/LATEST.txt')
-          ).text()
-        ).trim()
-        UIStore.update((s) => {
-          s.cheerpjUrl = url
-        })
-      })()
-    }
-  }, [cheerpjUrl])
-
   return (
     <>
-      {cheerpjUrl && <Script src={cheerpjUrl} onLoad={onLoad} />}
+      <Script
+        src="https://cjrt.arrrg.de/cheerpj_3_20240906/cj3loader.js"
+        onLoad={onLoad}
+      />
       <JavaRuntimeContext.Provider
         value={{ getRuntime: () => runtime.current }}
       >
@@ -64,7 +52,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           19005440, 19136512, 20840448, 21757952, 22020096, 22937600, 23068672,
           26869760,
         ],
-        '/lt/8/jre/lib/cheerpj-awt.jar': [0, 131072],
+        '/lt/8/jre/lib/cheerpj-awt.jar': [],
         '/lt/etc/passwd': [0, 131072],
         '/lt/etc/localtime': [],
         '/lt/8/ext/meta-index': [0, 131072],
@@ -228,13 +216,48 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
   function prepareInteractiveMode() {
     const ui = UIStore.getRawState()
     Object.values(ui.project!.classes).forEach((c) => {
-      const javaClassString = c.content
       const classAPI: ClassAPI = {
-        hasPublicConstructor: false,
-        publicConstructorParams: [],
-        publicMethods: [],
+        constructors: [],
+        methods: [],
       }
-      // Regex für öffentlichen Konstruktor
+      const tree = parser.parse(c.content)
+      const t = cursorToAstNode(tree.cursor(), Text.of(c.content.split('\n')))
+      let hasPrivateConstructor = false
+      const scan = (t: AstNode) => {
+        const name =
+          t.children.find((c) => c.name == 'Definition')?.text() ?? '???'
+        const mod =
+          t.children.find((c) => c.name == 'Modifiers')?.text() ?? 'protected'
+        if (t.name == 'ConstructorDeclaration' && name == c.name) {
+          // console.log('debug constructor', t.text(), mod)
+          if (mod == 'private') {
+            hasPrivateConstructor = true
+            // console.log('private constructor detected')
+          } else {
+            // TODO formal parameters
+            classAPI.constructors.push([])
+            // TODO const parameters = t.children.find(c => c.name == 'FormalParameters')
+          }
+        }
+        if (
+          t.name == 'MethodDeclaration' ||
+          t.name == 'ConstructorDeclaration'
+        ) {
+          if (!mod.includes('private')) {
+          }
+          // TODO: Konstruktor
+          prettyPrintAstNode(t)
+        }
+        t.children.forEach(scan)
+      }
+      scan(t)
+
+      if (classAPI.constructors.length == 0 && !hasPrivateConstructor) {
+        // default constructor
+        classAPI.constructors.push([])
+      }
+
+      /*// Regex für öffentlichen Konstruktor
       const constructorRegex = new RegExp(
         `public\\s+${c.name}\\s*\\(([^)]*)\\)`,
       )
@@ -244,9 +267,9 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         classAPI.hasPublicConstructor = true
         const params = constructorMatch[1].trim()
         if (params.length > 0) {
-          classAPI.publicConstructorParams = params
-            .split(/\s*,\s*/)
-            .map((param) => {
+          classAPI.publicConstructorParams = params*/
+      // .split(/\s*,\s*/)
+      /*   .map((param) => {
               const [type, name] = param.trim().split(/\s+/)
               return { name, type }
             })
@@ -264,9 +287,9 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         const params = methodMatch[3].trim()
 
         const paramList =
-          params.length > 0
-            ? params.split(/\s*,\s*/).map((param) => {
-                const [type, name] = param.trim().split(/\s+/)
+          params.length > 0*/
+      // ? params.split(/\s*,\s*/).map((param) => {
+      /*     const [type, name] = param.trim().split(/\s+/)
                 return { name, type }
               })
             : []
@@ -276,14 +299,15 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           returnType: returnType,
           parameters: paramList,
         })
-      }
+      }*/
+      console.log(classAPI)
       UIStore.update((s) => {
         s.api[c.name] = classAPI
       })
     })
   }
 
-  function getInteractiveElements() {
+  /*function getInteractiveElements(): InteractiveElements {
     const interactiveElements: InteractiveElement[] = []
 
     const ui = UIStore.getRawState()
@@ -356,5 +380,5 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       })
     })
     return interactiveElements
-  }
+  }*/
 }
