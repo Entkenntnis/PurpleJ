@@ -17,7 +17,6 @@ export interface IUIStore {
   instances: { name: string; type: string }[]
   inAction: boolean
   page: 'home' | 'ide'
-  cheerpjUrl: string
   controllerState: 'loading' | 'compile-if-dirty' | 'compiling' | 'running'
   showEditMetaTab: boolean
   editMeta: boolean

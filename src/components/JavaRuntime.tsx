@@ -4,7 +4,7 @@ import { UIStore } from '@/store/UIStore'
 import { Text } from '@codemirror/state'
 import { parser } from '@lezer/java'
 import Script from 'next/script'
-import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
+import { createContext, ReactNode, useContext, useRef } from 'react'
 
 const JavaRuntimeContext = createContext<{ getRuntime: () => Runtime }>({
   getRuntime() {
