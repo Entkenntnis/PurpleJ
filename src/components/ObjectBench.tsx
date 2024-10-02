@@ -61,12 +61,77 @@ export function ObjectBench() {
         <div className="flex justify-start items-center h-full">
           {Object.entries(runtime.getRuntime().heap).map(([key, val]) => {
             return (
-              <div
-                key={key}
-                className="h-[100px] bg-purple-300 mx-3 flex items-center px-2 rounded-xl text-center"
-              >
-                {key} :<br />
-                {val.type}
+              <div key={key} className="dropdown dropdown-top dropdown-start">
+                <div
+                  className="h-[100px] bg-purple-300 mx-3 flex items-center px-2 rounded-xl text-center"
+                  tabIndex={0}
+                  role="button"
+                >
+                  {key} :<br />
+                  {val.type}
+                </div>
+                <div
+                  tabIndex={0}
+                  className="dropdown-content bg-gray-100 rounded-box z-[1000] p-2 shadow ml-3 w-fit"
+                >
+                  {api[val.type].methods.map(({ name, parameters }, i) => {
+                    return (
+                      <div
+                        key={i}
+                        role="button"
+                        className="my-2 px-1 bg-white hover:bg-green-100"
+                        onClick={() => {
+                          void (async () => {
+                            UIStore.update((s) => {
+                              s.inAction = true
+                            })
+                            try {
+                              const params: (number | string)[] = []
+                              for (let i = 0; i < parameters.length; i++) {
+                                if (parameters[i].type == 'int')
+                                  params.push(
+                                    parseInt(
+                                      prompt(
+                                        `Gib Zahl ein für ${parameters[i].name}:`,
+                                      ) ?? '0',
+                                    ),
+                                  )
+                                if (parameters[i].type == 'String') {
+                                  params.push(
+                                    prompt(
+                                      `Gib Text ein für ${parameters[i].name}:`,
+                                    ) ?? '',
+                                  )
+                                }
+                              }
+                              await val.pointer[name](...params)
+
+                              UIStore.update((s) => {
+                                s.inAction = false
+                              })
+                              if ('blur' in (document.activeElement ?? {})) {
+                                // @ts-expect-error wrwr
+                                document.activeElement.blur()
+                              }
+                            } catch (e) {
+                              console.log(e)
+                              alert('Fehler beim Erzeugen des Objekts')
+                              UIStore.update((s) => {
+                                s.inAction = false
+                              })
+                            }
+                          })()
+                        }}
+                      >
+                        {name}(
+                        {parameters
+                          .map((p) => `${p.type}\xa0${p.name}`)
+                          .join(', ')}
+                        )
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )
           })}
@@ -134,7 +199,11 @@ export function ObjectBench() {
                             })()
                           }}
                         >
-                          new&nbsp;{key}(TODO)
+                          new&nbsp;{key}(
+                          {params
+                            .map((p) => `${p.type}\xa0${p.name}`)
+                            .join(', ')}
+                          )
                         </div>
                       ))}
                     </Fragment>

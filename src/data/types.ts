@@ -39,12 +39,14 @@ export interface Runtime {
   standardLib: any
 }
 
+export type FormalParameters = { name: string; type: string }[]
+
 export interface ClassAPI {
-  constructors: { name: string; type: string }[][]
+  constructors: FormalParameters[]
   methods: {
     name: string
     returnType: string
-    parameters: { name: string; type: string }[]
+    parameters: FormalParameters
   }[]
 }
 

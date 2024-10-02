@@ -1,5 +1,5 @@
-import { ClassAPI, Runtime } from '@/data/types'
-import { AstNode, cursorToAstNode, prettyPrintAstNode } from '@/lang/astNode'
+import { ClassAPI, FormalParameters, Runtime } from '@/data/types'
+import { AstNode, cursorToAstNode } from '@/lang/astNode'
 import { UIStore } from '@/store/UIStore'
 import { Text } from '@codemirror/state'
 import { parser } from '@lezer/java'
@@ -213,6 +213,16 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     })
   }
 
+  function parseFormalParameters(node: AstNode): FormalParameters {
+    return node.children
+      .filter((n) => n.name == 'FormalParameter')
+      .map((n) => {
+        console.log(n.text())
+        const [type, name] = n.text().split(' ')
+        return { name, type }
+      })
+  }
+
   function prepareInteractiveMode() {
     const ui = UIStore.getRawState()
     Object.values(ui.project!.classes).forEach((c) => {
@@ -235,7 +245,11 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
             // console.log('private constructor detected')
           } else {
             // TODO formal parameters
-            classAPI.constructors.push([])
+            classAPI.constructors.push(
+              parseFormalParameters(
+                t.children.find((c) => c.name == 'FormalParameters')!,
+              ),
+            )
             // TODO const parameters = t.children.find(c => c.name == 'FormalParameters')
           }
         }
@@ -244,9 +258,14 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           t.name == 'ConstructorDeclaration'
         ) {
           if (!mod.includes('private')) {
+            classAPI.methods.push({
+              returnType: 'void', // TODO
+              name,
+              parameters: parseFormalParameters(
+                t.children.find((c) => c.name == 'FormalParameters')!,
+              ),
+            })
           }
-          // TODO: Konstruktor
-          prettyPrintAstNode(t)
         }
         t.children.forEach(scan)
       }
