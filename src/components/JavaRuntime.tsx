@@ -56,7 +56,6 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         '/lt/etc/passwd': [0, 131072],
         '/lt/etc/localtime': [],
         '/lt/8/ext/meta-index': [0, 131072],
-        '/lt/8/ext': [],
         '/lt/8/ext/index.list': [],
         '/lt/8/ext/sunjce_provider.jar': [0, 262144],
         '/lt/8/jre/lib/jsse.jar': [0, 131072, 786432, 917504],
@@ -65,8 +64,6 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
         '/lt/8/jre/lib/resources.jar': [0, 131072, 917504, 1179648],
         '/lt/8/jre/lib/javaws.jar': [0, 131072, 1441792, 1703936],
         '/lt/8/jre/lib/meta-index': [0, 131072],
-        '/lt/8/jre/lib': [],
-        '/lt/8/lib/ct.sym': [],
       },
       natives: {
         async Java_SyntheticMain_entry(lib: object) {
@@ -174,7 +171,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       '-Xlint:-serial,-unchecked',
     ])
 
-    console.log(code)
+    // console.log(code)
 
     if (code === 0) {
       UIStore.update((s) => {
@@ -221,7 +218,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     return node.children
       .filter((n) => n.name == 'FormalParameter')
       .map((n) => {
-        console.log(n.text())
+        // console.log(n.text())
         const [type, name] = n.text().split(' ')
         return { name, type }
       })
@@ -323,7 +320,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           parameters: paramList,
         })
       }*/
-      console.log(classAPI)
+      // console.log(classAPI)
       UIStore.update((s) => {
         s.api[c.name] = classAPI
       })

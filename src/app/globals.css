@@ -3,10 +3,7 @@
 @tailwind utilities;
 
 .cheerpjNC::before {
-  top: 0;
-  bottom: unset !important;
-  border-top: unset !important;
-  border-bottom: 1px solid black;
+  display: none !important;
 }
 
 .cheerpjLoading {
