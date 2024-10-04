@@ -17,7 +17,15 @@ export function ObjectBench() {
   const runtime = useJavaRuntime()
 
   return (
-    <div className={clsx('h-full', inAction && 'cursor-wait')}>
+    <div className={clsx('h-full relative')}>
+      <div
+        className={clsx(
+          'absolute inset-0 z-[10] bg-gray-200 flex items-center justify-center transition-opacity duration-500',
+          inAction ? 'opacity-50' : 'pointer-events-none opacity-0 duration-0',
+        )}
+      >
+        <Spinner />
+      </div>
       {controllerState === 'loading' && (
         <div className="flex justify-center items-center h-full">
           <p className="italic text-gray-600 pb-6 animate-pulse">
@@ -29,7 +37,7 @@ export function ObjectBench() {
         <div className="flex justify-center items-center h-full">
           <p className="text-purple-600 pb-6">
             <Spinner />
-            Klassen werden kompiliert ... einen kleinen Moment Geduld 🙏
+            Klassen werden kompiliert ...
           </p>
         </div>
       )}
@@ -85,6 +93,10 @@ export function ObjectBench() {
                             UIStore.update((s) => {
                               s.inAction = true
                             })
+                            if ('blur' in (document.activeElement ?? {})) {
+                              // @ts-expect-error wrwr
+                              document.activeElement.blur()
+                            }
                             try {
                               const params: (number | string)[] = []
                               for (let i = 0; i < parameters.length; i++) {
@@ -109,10 +121,6 @@ export function ObjectBench() {
                               UIStore.update((s) => {
                                 s.inAction = false
                               })
-                              if ('blur' in (document.activeElement ?? {})) {
-                                // @ts-expect-error wrwr
-                                document.activeElement.blur()
-                              }
                             } catch (e) {
                               console.log(e)
                               alert('Fehler beim Erzeugen des Objekts')
@@ -163,6 +171,11 @@ export function ObjectBench() {
                               UIStore.update((s) => {
                                 s.inAction = true
                               })
+                              if ('blur' in (document.activeElement ?? {})) {
+                                // @ts-expect-error wrwr
+                                document.activeElement.blur()
+                              }
+
                               try {
                                 const C = await runtime.getRuntime().lib[key]
                                 const instance = await new C()
@@ -185,10 +198,6 @@ export function ObjectBench() {
                                   })
                                   s.inAction = false
                                 })
-                                if ('blur' in (document.activeElement ?? {})) {
-                                  // @ts-expect-error wrwr
-                                  document.activeElement.blur()
-                                }
                               } catch (e) {
                                 console.log(e)
                                 alert('Fehler beim Erzeugen des Objekts')
@@ -212,25 +221,6 @@ export function ObjectBench() {
               </div>
             </div>
           }
-          {/*runtime
-              .getRuntime()
-              .getInteractiveElements()
-              .map((el, i) => (
-                <button
-                  key={i}
-                  className={clsx(
-                    'm-1 px-1 py-0.5 bg-gray-200 rounded',
-                    inAction ? 'cursor-wait' : 'hover:bg-gray-300',
-                  )}
-                  onClick={() => {
-                    if (!inAction) {
-                      el.action()
-                    }
-                  }}
-                >
-                  {el.code}
-                </button>
-              ))*/}
         </div>
       )}
     </div>

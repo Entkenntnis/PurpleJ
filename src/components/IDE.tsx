@@ -31,6 +31,7 @@ export default function IDE() {
   const files = UIStore.useState((s) => s.project!.files)
   const controllerState = UIStore.useState((s) => s.controllerState)
   const showOutput = UIStore.useState((s) => s.showOutput)
+  const inAction = UIStore.useState((s) => s.inAction)
 
   const runtime = useJavaRuntime()
 
@@ -253,7 +254,11 @@ export default function IDE() {
                   <option value="terminal">Terminal</option>
                 </select>
                 <button
-                  className="inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500"
+                  className={clsx(
+                    'inline-block flex items-center justify-center p-0.5 pb-1 h-4 rounded bg-white ml-3 hover:bg-red-500',
+                    inAction && 'opacity-50',
+                  )}
+                  disabled={inAction}
                   onClick={(e) => {
                     runtime.getRuntime().exit()
                     UIStore.update((s) => {
