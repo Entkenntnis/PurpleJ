@@ -89,7 +89,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
     // System is loaded, what to do next?
 
-    runtime.current.standardLib = await cheerpjRunLibrary('')
+    runtime.current.standardLib = await cheerpjRunLibrary('/app/tools.jar')
 
     if (UIStore.getRawState().page !== 'ide') {
       // warm up by loading javac
@@ -162,16 +162,20 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       sourceFiles.push(filename)
     }
 
-    document.getElementById('console')!.innerHTML = ''
+    //document.getElementById('console')!.innerHTML = ''
 
-    const code = await cheerpjRunMain(
-      'com.sun.tools.javac.Main',
-      '/app/tools.jar:/files/:' + d,
+    const javac = await runtime.current.standardLib.com.sun.tools.javac.Main
+    const code = await javac.compile([
       ...sourceFiles,
+      '-cp',
+      d,
       '-d',
       d,
       '-Xlint:-serial,-unchecked',
-    )
+    ])
+
+    console.log(code)
+
     if (code === 0) {
       UIStore.update((s) => {
         s.controllerState = 'compile-if-dirty'
@@ -198,7 +202,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       s.controllerState = 'running'
       s.showOutput = true
     })
-    document.getElementById('console')!.innerHTML = ''
+    //document.getElementById('console')!.innerHTML = ''
     if (runtime.current.displayElement) {
       runtime.current.displayElement.innerHTML = ''
       cheerpjCreateDisplay(-1, -1, runtime.current.displayElement)
