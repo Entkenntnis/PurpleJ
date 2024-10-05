@@ -13,6 +13,7 @@ export function ObjectBench() {
   const inAction = UIStore.useState((s) => s.inAction)
   const syntheticMainCompiled = UIStore.useState((s) => s.syntheticMainCompiled)
   const api = UIStore.useState((s) => s.api)
+  const showOutput = UIStore.useState((s) => s.showOutput)
 
   const runtime = useJavaRuntime()
 
@@ -41,7 +42,8 @@ export function ObjectBench() {
           </p>
         </div>
       )}
-      {controllerState === 'compile-if-dirty' && (
+      {(controllerState === 'compile-if-dirty' ||
+        (controllerState === 'running' && !showOutput)) && (
         <div className="flex justify-center items-center h-full">
           <p className="pb-2">
             <button
@@ -65,7 +67,7 @@ export function ObjectBench() {
           </p>
         </div>
       )}
-      {controllerState === 'running' && (
+      {controllerState === 'running' && showOutput && (
         <div className="flex justify-start items-center h-full">
           {Object.entries(runtime.getRuntime().heap).map(([key, val]) => {
             return (
@@ -80,7 +82,7 @@ export function ObjectBench() {
                 </div>
                 <div
                   tabIndex={0}
-                  className="dropdown-content bg-gray-100 rounded-box z-[1000] p-2 shadow ml-3 w-fit"
+                  className="dropdown-content bg-gray-100 rounded-box z-[1000] p-2 shadow ml-3 w-fit max-h-[50vh] overflow-y-auto"
                 >
                   {api[val.type].methods.map(({ name, parameters }, i) => {
                     return (
@@ -116,14 +118,22 @@ export function ObjectBench() {
                                   )
                                 }
                               }
-                              await val.pointer[name](...params)
+
+                              const SyntheticMain =
+                                await runtime.getRuntime().lib.SyntheticMain
+                              const C = await SyntheticMain.getClass(val.type)
+
+                              const method = await C.getDeclaredMethod(name, [])
+                              await method.invoke(val.pointer, [])
+
+                              // await val.pointer[name](...params)
 
                               UIStore.update((s) => {
                                 s.inAction = false
                               })
                             } catch (e) {
                               console.log(e)
-                              alert('Fehler beim Erzeugen des Objekts')
+                              alert('Fehler beim Aufruf')
                               UIStore.update((s) => {
                                 s.inAction = false
                               })
@@ -139,6 +149,21 @@ export function ObjectBench() {
                       </div>
                     )
                   })}
+                  <div
+                    role="button"
+                    className="my-2 px-1 bg-white hover:bg-red-100 rounded"
+                    onClick={() => {
+                      UIStore.update((s) => {
+                        s.inAction = true
+                      })
+                      delete runtime.getRuntime().heap[key]
+                      UIStore.update((s) => {
+                        s.inAction = false
+                      })
+                    }}
+                  >
+                    Entfernen
+                  </div>
                 </div>
               </div>
             )
@@ -177,8 +202,37 @@ export function ObjectBench() {
                               }
 
                               try {
-                                const C = await runtime.getRuntime().lib[key]
-                                const instance = await new C()
+                                // Step 1: Get the Class object of ZWERG
+                                // Class<?> zwergClass = ZWERG.class;
+
+                                const SyntheticMain =
+                                  await runtime.getRuntime().lib.SyntheticMain
+                                const C = await SyntheticMain.getClass(key)
+                                console.log(key)
+
+                                const constructors =
+                                  await C.getDeclaredConstructors()
+
+                                /*console.log(constructors)
+
+                                for (let i = 0; i < constructors.length; i++) {
+                                  console.log(
+                                    'Konstruktor',
+                                    await constructors[i].getName(),
+                                  )
+                                  const params =
+                                    await constructors[i].getParameterTypes()
+                                  for (let j = 0; j < params.length; j++) {
+                                    console.log(await params[j].getName())
+                                  }
+                                }*/
+
+                                const instance =
+                                  await constructors[0].newInstance([])
+
+                                // Step 2: Create an instance of ZWERG using newInstance()
+                                // Object zwergInstance = zwergClass.getDeclaredConstructor().newInstance();
+
                                 let i = 1
                                 let instanceName = ''
                                 do {

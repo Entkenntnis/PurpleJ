@@ -119,15 +119,25 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
     cheerpOSAddStringFile(
       sourceFiles[0],
-      encoder.encode(`class SyntheticMain {
+      encoder.encode(`
+        class SyntheticMain {
             public static void main(String[] args) {
-              System.out.println("Interaktiver Modus bereit");
-              entry();
-              System.out.println("VM fährt herunter");
-              System.exit(0);
+                System.out.println("Interaktiver Modus bereit");
+                entry();
+                System.out.println("VM fährt herunter");
+                System.exit(0);
             }
             public static native void entry();
-          }`),
+
+            public static Class<?> getClass(String name) {
+                try {
+                   return Class.forName(name);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }`),
     )
 
     const File = await runtime.current.standardLib.java.io.File
@@ -258,7 +268,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           t.name == 'MethodDeclaration' ||
           t.name == 'ConstructorDeclaration'
         ) {
-          if (!mod.includes('private')) {
+          if (!mod.includes('private') && name != c.name) {
             classAPI.methods.push({
               returnType: 'void', // TODO
               name,
