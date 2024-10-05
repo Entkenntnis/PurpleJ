@@ -149,7 +149,7 @@ const SingleClass = ({
           {data.label}
         </p>
         <div
-          className={clsx('pl-2 pt-3 pb-6 pr-6 flex-grow')}
+          className={clsx('p-3 flex-grow')}
           style={
             data.dirty
               ? {
@@ -165,7 +165,7 @@ const SingleClass = ({
           }
         >
           <button
-            className="bg-gray-100 hover:bg-green-200 w-7 h-7 rounded"
+            className="bg-gray-100 hover:bg-green-200 w-14 h-14 rounded"
             onClick={() => {
               UIStore.update((s) => {
                 if (!s.openClasses.includes(data.label)) {

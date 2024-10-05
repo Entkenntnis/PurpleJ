@@ -12,7 +12,7 @@ export function Guide() {
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="h-[calc(100%-360px)] flex flex-col">
+        <div className="h-full flex flex-col">
           <div className="border-b border-gray-200 hidden">
             <button
               className={clsx(
