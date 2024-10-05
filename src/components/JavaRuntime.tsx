@@ -1,3 +1,4 @@
+import { parseExercises } from '@/actions/parse-exercises'
 import { ClassAPI, FormalParameters, Runtime } from '@/data/types'
 import { AstNode, cursorToAstNode } from '@/lang/astNode'
 import { UIStore } from '@/store/UIStore'
@@ -71,6 +72,16 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
           window.lib = lib
           runtime.current.lib = lib
           prepareInteractiveMode()
+          const exercises = UIStore.getRawState().exercises
+          for (const ex of exercises) {
+            try {
+              const C = await runtime.current.lib[ex.className]
+              const instance = await new C()
+              await instance['onInteractive']()
+            } catch (e) {
+              console.log(e)
+            }
+          }
           UIStore.update((s) => {
             s.inAction = false
           })
@@ -79,6 +90,33 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
               runtime.current.exit = () => {}
               res(null)
             }
+          })
+        },
+        async Java_PurpleJExercise_internalSetCompleted(
+          lib: object,
+          _: never,
+          c: string,
+        ) {
+          UIStore.update((s) => {
+            s.exercises.forEach((ex) => {
+              if (ex.className == c) {
+                ex.status = true
+              }
+            })
+          })
+        },
+        async Java_PurpleJExercise_internalSetStatus(
+          lib: object,
+          _: never,
+          c: string,
+          msg: string,
+        ) {
+          UIStore.update((s) => {
+            s.exercises.forEach((ex) => {
+              if (ex.className == c) {
+                ex.status = msg
+              }
+            })
           })
         },
       },
@@ -109,13 +147,17 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     UIStore.update((s) => {
       s.controllerState = 'compiling'
     })
+    parseExercises()
     const ui = UIStore.getRawState()
 
     const d = `/files/${ui.projectId}/`
 
     // This is the compile step
     const encoder = new TextEncoder()
-    const sourceFiles = [`/str/${ui.projectId}/SyntheticMain.java`]
+    const sourceFiles = [
+      `/str/${ui.projectId}/SyntheticMain.java`,
+      `/str/${ui.projectId}/__Exercise.java`,
+    ]
 
     cheerpOSAddStringFile(
       sourceFiles[0],
@@ -128,15 +170,28 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
                 System.exit(0);
             }
             public static native void entry();
+        }`),
+    )
 
-            public static Class<?> getClass(String name) {
-                try {
-                   return Class.forName(name);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
+    cheerpOSAddStringFile(
+      sourceFiles[1],
+      encoder.encode(`
+        class PurpleJExercise {
+           public void onInteractive() {}
+
+           public void setCompleted() {
+              String className = getClass().getName();
+              internalSetCompleted(className);
+           }
+
+           public void setStatus(String s) {
+              String className = getClass().getName();
+              internalSetStatus(className, s);
+           }
+
+           public native void internalSetCompleted(String c);
+
+           public native void internalSetStatus(String c, String s);
         }`),
     )
 

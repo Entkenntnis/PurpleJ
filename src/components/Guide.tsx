@@ -3,10 +3,11 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import Markdown from 'react-markdown'
 import { FaIcon } from './FaIcon'
-import { faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faPencil } from '@fortawesome/free-solid-svg-icons'
 
 export function Guide() {
   const project = UIStore.useState((s) => s.project)
+  const exercises = UIStore.useState((s) => s.exercises)
   const [tab, setTab] = useState(0)
 
   return (
@@ -68,6 +69,26 @@ export function Guide() {
                 <Markdown>{project!.description}</Markdown>
               </div>
             )}
+            <div className="mt-12">
+              {exercises.map((ex) => (
+                <div key={ex.className} className="border rounded p-3 mb-4">
+                  <h3 className="font-bold text-xl mb-3">{ex.title}</h3>
+                  <Markdown>{ex.description}</Markdown>
+                  <div className="mt-3">
+                    Status:{' '}
+                    {ex.status === true ? (
+                      <span className="text-green-600">
+                        abgeschlossen <FaIcon icon={faCheck} />
+                      </span>
+                    ) : ex.status === null ? (
+                      <span className="text-gray-400">---</span>
+                    ) : (
+                      <span className="text-gray-700">{ex.status}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

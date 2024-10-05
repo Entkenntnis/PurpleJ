@@ -18,4 +18,5 @@ export const UIStore = new Store<IUIStore>({
   editResources: false,
   showOutput: false,
   syntheticMainCompiled: false,
+  exercises: [],
 })

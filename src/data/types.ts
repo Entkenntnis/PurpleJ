@@ -5,6 +5,13 @@ export interface Class {
   size?: { width: number; height: number }
 }
 
+export interface Exercise {
+  title: string
+  description: string
+  status: null | true | string
+  className: string
+}
+
 type Output = 'display' | 'terminal'
 
 export interface IUIStore {
@@ -24,6 +31,7 @@ export interface IUIStore {
   editResources: boolean
   showOutput: boolean
   syntheticMainCompiled: boolean
+  exercises: Exercise[]
 }
 
 export interface Runtime {

@@ -1,5 +1,6 @@
 import { Project, Runtime } from '@/data/types'
 import { UIStore } from '@/store/UIStore'
+import { parseExercises } from './parse-exercises'
 
 export function loadProject(p: Project, r: Runtime, id?: string) {
   UIStore.update((s) => {
@@ -16,6 +17,7 @@ export function loadProject(p: Project, r: Runtime, id?: string) {
     s.showOutput = false
     s.syntheticMainCompiled = false
   })
+  parseExercises()
   if (UIStore.getRawState().controllerState != 'loading') {
     r.compile()
   }
