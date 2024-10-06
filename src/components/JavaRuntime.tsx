@@ -170,6 +170,15 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
                 System.exit(0);
             }
             public static native void entry();
+
+            public static Class<?> getClass(String name) {
+              try {
+                return Class.forName(name);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+              return null;
+          }
         }`),
     )
 
