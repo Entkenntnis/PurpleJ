@@ -11,6 +11,7 @@ import gng from '../../content/gng.json'
 import empty from '../../content/leer.json'
 import house from '../../content/house.json'
 import labClasses from '../../content/lab-classes.json'
+import musicOrganizer from '../../content/music-organizer.json'
 
 export const projects: Project[] = [
   tutorial1,
@@ -24,4 +25,5 @@ export const projects: Project[] = [
   empty,
   house,
   labClasses,
+  musicOrganizer,
 ] as Project[]
