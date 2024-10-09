@@ -178,7 +178,15 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
                 e.printStackTrace();
               }
               return null;
-          }
+            }
+
+            public static Class<?> getIntClass() {
+              return int.class;
+            }
+
+            public static Class<?> getStringClass() {
+              return String.class;
+            }
         }`),
     )
 
@@ -234,12 +242,13 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     }
 
     //document.getElementById('console')!.innerHTML = ''
+    const cp = d + (ui.project!.libs ? ':' + ui.project!.libs : '')
 
     const javac = await runtime.current.standardLib.com.sun.tools.javac.Main
     const code = await javac.compile([
       ...sourceFiles,
       '-cp',
-      d,
+      cp,
       '-d',
       d,
       '-Xlint:-serial,-unchecked',
@@ -263,7 +272,9 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
   async function run() {
     const ui = UIStore.getRawState()
-    const d = `/files/${ui.projectId}/`
+    const cp =
+      `/files/${ui.projectId}/` +
+      (ui.project!.libs ? ':' + ui.project!.libs : '')
     UIStore.update((s) => {
       s.instances = []
       s.inAction = true
@@ -281,7 +292,7 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
 
     runtime.current.heap = {}
     prepareInteractiveMode()
-    await cheerpjRunMain('SyntheticMain', d)
+    await cheerpjRunMain('SyntheticMain', cp)
     // console.log('result', r)
     UIStore.update((s) => {
       s.controllerState = 'compile-if-dirty'

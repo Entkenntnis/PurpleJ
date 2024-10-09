@@ -100,9 +100,14 @@ export function ObjectBench() {
                               document.activeElement.blur()
                             }
                             try {
+                              const SyntheticMain =
+                                await runtime.getRuntime().lib.SyntheticMain
+
                               const params: (number | string)[] = []
+                              const cArgs = []
                               for (let i = 0; i < parameters.length; i++) {
-                                if (parameters[i].type == 'int')
+                                if (parameters[i].type == 'int') {
+                                  cArgs.push(await SyntheticMain.getIntClass())
                                   params.push(
                                     parseInt(
                                       prompt(
@@ -110,21 +115,38 @@ export function ObjectBench() {
                                       ) ?? '0',
                                     ),
                                   )
-                                if (parameters[i].type == 'String') {
+                                } else if (parameters[i].type == 'String') {
+                                  cArgs.push(
+                                    await SyntheticMain.getStringClass(),
+                                  )
                                   params.push(
                                     prompt(
                                       `Gib Text ein für ${parameters[i].name}:`,
                                     ) ?? '',
                                   )
+                                } else {
+                                  cArgs.push(
+                                    await SyntheticMain.getClass(
+                                      parameters[i].type,
+                                    ),
+                                  )
+                                  params.push(
+                                    runtime.getRuntime().heap[
+                                      prompt(
+                                        `Gib den Namen eines Objektes ein vom Typ ${parameters[i].type} an:`,
+                                      ) ?? ''
+                                    ].pointer,
+                                  )
                                 }
                               }
 
-                              const SyntheticMain =
-                                await runtime.getRuntime().lib.SyntheticMain
                               const C = await SyntheticMain.getClass(val.type)
 
-                              const method = await C.getDeclaredMethod(name, [])
-                              await method.invoke(val.pointer, [])
+                              const method = await C.getDeclaredMethod(
+                                name,
+                                cArgs,
+                              )
+                              await method.invoke(val.pointer, params)
 
                               // await val.pointer[name](...params)
 
@@ -186,7 +208,7 @@ export function ObjectBench() {
                 {Object.entries(api).map(([key, val]) => {
                   return (
                     <Fragment key={key}>
-                      {val.constructors.map((params, i) => (
+                      {val.constructors.map((parameters, i) => (
                         <div
                           key={i}
                           role="button"
@@ -202,16 +224,41 @@ export function ObjectBench() {
                               }
 
                               try {
-                                // Step 1: Get the Class object of ZWERG
-                                // Class<?> zwergClass = ZWERG.class;
-
                                 const SyntheticMain =
                                   await runtime.getRuntime().lib.SyntheticMain
                                 const C = await SyntheticMain.getClass(key)
-                                console.log(key)
 
-                                const constructors =
-                                  await C.getDeclaredConstructors()
+                                const params: (number | string)[] = []
+                                const cArgs = []
+                                for (let i = 0; i < parameters.length; i++) {
+                                  if (parameters[i].type == 'int') {
+                                    cArgs.push(
+                                      await SyntheticMain.getIntClass(),
+                                    )
+                                    params.push(
+                                      parseInt(
+                                        prompt(
+                                          `Gib Zahl ein für ${parameters[i].name}:`,
+                                        ) ?? '0',
+                                      ),
+                                    )
+                                  }
+                                  if (parameters[i].type == 'String') {
+                                    cArgs.push(
+                                      await SyntheticMain.getStringClass(),
+                                    )
+                                    params.push(
+                                      prompt(
+                                        `Gib Text ein für ${parameters[i].name}:`,
+                                      ) ?? '',
+                                    )
+                                  }
+                                }
+
+                                console.log(cArgs)
+
+                                const constructor =
+                                  await C.getDeclaredConstructor(cArgs)
 
                                 /*console.log(constructors)
 
@@ -228,7 +275,7 @@ export function ObjectBench() {
                                 }*/
 
                                 const instance =
-                                  await constructors[0].newInstance([])
+                                  await constructor.newInstance(params)
 
                                 // Step 2: Create an instance of ZWERG using newInstance()
                                 // Object zwergInstance = zwergClass.getDeclaredConstructor().newInstance();
@@ -263,7 +310,7 @@ export function ObjectBench() {
                           }}
                         >
                           new&nbsp;{key}(
-                          {params
+                          {parameters
                             .map((p) => `${p.type}\xa0${p.name}`)
                             .join(', ')}
                           )

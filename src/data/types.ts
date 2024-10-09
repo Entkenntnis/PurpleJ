@@ -65,5 +65,6 @@ export interface Project {
   output: Output
   classes: Class[]
   files?: { name: string; content: string }[]
+  libs?: string
   lastUpdated: number
 }
