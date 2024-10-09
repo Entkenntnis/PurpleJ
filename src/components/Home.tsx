@@ -5,6 +5,8 @@ import { Spinner } from './Spinner'
 import { loadProject } from '@/actions/load-project'
 import graph from '../../content/graph.json'
 import { useJavaRuntime } from './JavaRuntime'
+import { FaIcon } from './FaIcon'
+import { faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
@@ -132,9 +134,9 @@ export function Home() {
             .
           </p>
           <img
-            src="/CheerpJ_White_Horizontal_Trans-300x81.png.webp"
+            src="/CheerpJ_Horizontal_Trans.png"
             alt="CheerpJ Logo"
-            className="bg-gray-700 px-3 py-3 h-[60px] mt-3"
+            className="px-3 py-3 h-[60px] mt-3"
           />
         </div>
       </div>
@@ -151,6 +153,13 @@ export function Home() {
           }}
         >
           {project.title} [{new Date(project.lastUpdated).toLocaleString()}]
+        </button>
+        <button
+          onClick={() => {
+            localStorage.removeItem(`purplej_project_${id}`)
+          }}
+        >
+          <FaIcon icon={faTrash} />
         </button>
       </li>
     )
