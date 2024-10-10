@@ -7,10 +7,12 @@ import graph from '../../content/graph.json'
 import { useJavaRuntime } from './JavaRuntime'
 import { FaIcon } from './FaIcon'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { UIStore } from '@/store/UIStore'
 
 export function Home() {
   const [local, setLocal] = useState<[string, Project][] | null>(null)
   const runtime = useJavaRuntime()
+  const inAction = UIStore.useState((s) => s.inAction)
 
   useEffect(() => {
     if (window.location.hash == '#graph') {
@@ -27,7 +29,7 @@ export function Home() {
 
     setLocal(locals)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [inAction])
 
   return (
     <>
@@ -156,7 +158,15 @@ export function Home() {
         </button>
         <button
           onClick={() => {
+            UIStore.update((s) => {
+              s.inAction = true
+            })
             localStorage.removeItem(`purplej_project_${id}`)
+            setTimeout(() => {
+              UIStore.update((s) => {
+                s.inAction = false
+              })
+            }, 10)
           }}
         >
           <FaIcon icon={faTrash} />
