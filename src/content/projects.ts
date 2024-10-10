@@ -12,6 +12,10 @@ import empty from '../../content/leer.json'
 import house from '../../content/house.json'
 import labClasses from '../../content/lab-classes.json'
 import musicOrganizer from '../../content/music-organizer.json'
+import animalMonitor from '../../content/animal-monitor.json'
+import bouncingBall from '../../content/bouncing-balls.json'
+import scribble from '../../content/scribble.json'
+import techSupport from '../../content/tech-support.json'
 
 export const projects: Project[] = [
   tutorial1,
@@ -26,4 +30,8 @@ export const projects: Project[] = [
   house,
   labClasses,
   musicOrganizer,
+  animalMonitor,
+  bouncingBall,
+  scribble,
+  techSupport,
 ] as Project[]

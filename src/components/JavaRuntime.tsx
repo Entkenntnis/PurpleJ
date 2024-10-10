@@ -119,6 +119,14 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
             })
           })
         },
+        async Java_CustomFileInputStream_getCurrentInputString() {
+          return new Promise((res) => {
+            setTimeout(() => {
+              const val = prompt()
+              res((val ?? '') + '\n')
+            }, 100)
+          })
+        },
       },
     })
 
@@ -156,7 +164,8 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
     const encoder = new TextEncoder()
     const sourceFiles = [
       `/str/${ui.projectId}/SyntheticMain.java`,
-      `/str/${ui.projectId}/__Exercise.java`,
+      `/str/${ui.projectId}/PurpleJExercise.java`,
+      `/str/${ui.projectId}/CustomFileInputStream.java`,
     ]
 
     cheerpOSAddStringFile(
@@ -164,6 +173,11 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
       encoder.encode(`
         class SyntheticMain {
             public static void main(String[] args) {
+                try {
+                    System.setIn(new CustomFileInputStream());
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
                 System.out.println("Interaktiver Modus bereit");
                 entry();
                 System.out.println("VM fährt herunter");
@@ -209,6 +223,65 @@ export function JavaRuntime({ children }: { children: ReactNode }) {
            public native void internalSetCompleted(String c);
 
            public native void internalSetStatus(String c, String s);
+        }`),
+    )
+
+    cheerpOSAddStringFile(
+      sourceFiles[2],
+      encoder.encode(`
+        import java.io.*;
+        import java.util.concurrent.*;
+        import java.util.*;
+        import java.nio.file.*;
+        import java.lang.reflect.*;
+        import java.nio.charset.*;
+
+        class CustomFileInputStream extends InputStream {
+            public CustomFileInputStream() throws IOException { 
+                super();
+            }
+            @Override
+            public int available() throws IOException{
+                return 0;
+            }
+            @Override 
+            public int read() {
+                return 0;
+            }
+            @Override
+            public int read(byte[] b, int o, int l) throws IOException {
+                while (true) {
+                    // Block until the textbox has content
+                    String cInpStr = getCurrentInputString();
+                    while (cInpStr.length() != 0) {
+                        // Read the textbox as bytes
+                        int j = 0;
+                        byte[] data = cInpStr.getBytes();
+                        for (int i = 0; i < l - o; i++) {
+                            if (i < data.length) {
+                                j++;
+                                b[i + o] = data[i];
+                            }
+                        }
+                        return j;
+                    }
+                    // Wait before checking again
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        // in case the program gets interrupted before finishing (not really possible with cheerpj)
+                        System.out.println("Interrupted");
+                    }
+                }
+            }
+            @Override
+            public int read(byte[] b) throws IOException {
+                return read(b, 0, b.length);
+            }
+
+            // implemented in javascript
+            public static native String getCurrentInputString();
+            public static native void clearCurrentInputString();
         }`),
     )
 
