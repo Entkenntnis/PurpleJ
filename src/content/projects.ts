@@ -16,6 +16,12 @@ import animalMonitor from '../../content/animal-monitor.json'
 import bouncingBall from '../../content/bouncing-balls.json'
 import scribble from '../../content/scribble.json'
 import techSupport from '../../content/tech-support.json'
+import automaton from '../../content/automaton.json'
+import brain from '../../content/brain.json'
+import weblogAnalyzer from '../../content/weblog-analyzer.json'
+import zuul from '../../content/zuul.json'
+import calculator from '../../content/calculator.json'
+import foxesAndRabbits from '../../content/foxes-and-rabbits.json'
 
 export const projects: Project[] = [
   tutorial1,
@@ -34,4 +40,10 @@ export const projects: Project[] = [
   bouncingBall,
   scribble,
   techSupport,
+  automaton,
+  brain,
+  weblogAnalyzer,
+  zuul,
+  calculator,
+  foxesAndRabbits,
 ] as Project[]
