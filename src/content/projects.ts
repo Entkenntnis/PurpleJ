@@ -22,6 +22,10 @@ import weblogAnalyzer from '../../content/weblog-analyzer.json'
 import zuul from '../../content/zuul.json'
 import calculator from '../../content/calculator.json'
 import foxesAndRabbits from '../../content/foxes-and-rabbits.json'
+import imageviewer from '../../content/imageviewer.json'
+import layouts from '../../content/layouts.json'
+import musicplayer from '../../content/musicplayer.json'
+import taxiCompany from '../../content/taxi-company.json'
 
 export const projects: Project[] = [
   tutorial1,
@@ -46,4 +50,8 @@ export const projects: Project[] = [
   zuul,
   calculator,
   foxesAndRabbits,
+  imageviewer,
+  layouts,
+  musicplayer,
+  taxiCompany,
 ] as Project[]
